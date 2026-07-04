@@ -75,7 +75,7 @@ then run the worker as follows:
    activate the production nowcast :program:`conda` environment,
    and navigate to the nowcast configuration and logging directory:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ ssh skookum
        skookum$ conda activate /SalishSeaCast/nowcast-env
@@ -84,7 +84,7 @@ then run the worker as follows:
    for the appropriate forecast with debug logging,
    for example:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (/SalishSeaCast/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 2.5km --debug
 
@@ -117,7 +117,7 @@ You can use the ``-h`` or ``--help`` flags to get a usage message that explains
 the worker's required arguments,
 and its option flags:
 
-.. code-block:: bash
+.. code-block:: console
 
     (nowcast)$ python -m nowcast.workers.download_weather --help
 
@@ -165,7 +165,7 @@ That can be accomplished as follows:
 #. Activate your nowcast :program:`conda` environment,
    and navigate to your nowcast development and testing environment:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ source activate salishsea-nowcast
        (nowcast)$ cd MEOPAR/nowcast/
@@ -186,7 +186,7 @@ That can be accomplished as follows:
         The directory :file:`/ocean/<your_userid>/MEOPAR/GRIB/` must exist.
         Create it if necessary with:
 
-        .. code-block:: bash
+        .. code-block:: console
 
             $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
 

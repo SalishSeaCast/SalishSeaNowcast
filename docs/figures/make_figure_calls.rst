@@ -33,7 +33,7 @@ We'll use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figu
 You should run your test notebooks and :py:mod:`~nowcast.workers.make_plots` worker tests in a :ref:`NowcastFiguresDevEnv`.
 You can activate it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate nowcast-fig-dev
 
@@ -192,7 +192,7 @@ We can test that we have set up the necessary dataset loading and registered our
    activate your :ref:`NowcastFiguresDevEnv`,
    and navigate to your :file:`SalishSeaNowcast/` directory:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ source activate nowcast-fig-dev
        (nowcast-fig-dev)$ cd SalishSeaNowcast/
@@ -200,7 +200,7 @@ We can test that we have set up the necessary dataset loading and registered our
 #. Set up 2 environment variables that the nowcast system expects to find,
    and create a temporary logging directory for it to use:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (nowcast-fig-dev)$ export NOWCAST_LOGS=/tmp/$USER
        (nowcast-fig-dev)$ export NOWCAST_ENV=$CONDA_PREFIX
@@ -209,7 +209,7 @@ We can test that we have set up the necessary dataset loading and registered our
 
 #. Run the :py:mod:`make_plots` worker:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (nowcast-fig-dev)$ python -m nowcast.workers.make_plots config/nowcast.yaml nowcast-green research --debug --test-figure nitrate_thalweg_and_surface --run-date 2017-04-29
 

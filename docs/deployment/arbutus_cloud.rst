@@ -71,7 +71,7 @@ Access & Security
 
 Generate an ssh key pair on a Linux or OS/X system using the command:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $HOME/.ssh/
     $ ssh -t rsa -b 4096 -f ~/.ssh/arbutus.cloud_id_rsa -C <yourname>-arbutus.cloud
@@ -237,7 +237,7 @@ Use :guilabel:`Actions > Manage Attachments` to attach the volume to the ``nowca
 
 Log in to the publicly accessible head node instance with the command:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh -i $HOME/.ssh/arbutus.cloud_id_rsa ubuntu@<ip-address>
 
@@ -251,13 +251,13 @@ You will also be prompted for the passphrase that you assigned to the ssh key pa
 On Linux and OS/X authenticating the ssh key with your passphrase has the side-effect of adding it to the :command:`ssh-agent` instance that was started when you logged into the system.
 You can add the key to the agent yourself with the command:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh-add $HOME/.ssh/arbutus.cloud_id_rsa
 
 You can list the keys that the agent is managing for you with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh-add -l
 
@@ -273,7 +273,7 @@ You can simplify logins to the instance by adding the following lines to your :f
 
 With that in place you should be able to connect to the instance with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh arbutus.cloud
 
@@ -287,7 +287,7 @@ Head Node
 Fetch and apply any available updates on the ``nowcast0`` :ref:`HeadNodeInstance`
 that you launched above with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
@@ -295,7 +295,7 @@ that you launched above with:
 
 Set the timezone with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo timedatectl set-timezone America/Vancouver
 
@@ -304,13 +304,13 @@ time,
 time zone,
 and that the ``systemd-timesyncd.service`` is activate with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ timedatectl status
 
 Provision the :ref:`HeadNodeInstance` with the following packages:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo apt update
     $ sudo apt install -y mercurial git
@@ -325,14 +325,14 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
 
 Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` pm the head node:
 
-.. code-block:: bash
+.. code-block:: console
 
     # on a system where they key pair is stored
     $ ssh-copy-id -f -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
 
 Copy the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` as :file:`id_rsa` and :file:`id_rsa.pub` for :command:`mpirun` to use for communication with the compute instances:
 
-.. code-block:: bash
+.. code-block:: console
 
     # on a system where they key pair is stored
     $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud:.ssh/id_rsa
@@ -346,7 +346,7 @@ the possibility of revoking the passphrase-less key pair without loosing access 
 Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
 and export environment variables to enable wwatch3 to use netCDF4:
 
-.. code-block:: bash
+.. code-block:: console
 
     # Add wwatch3 bin/ and exe/ paths to PATH if they exist
     if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
@@ -362,7 +362,7 @@ and export environment variables to enable wwatch3 to use netCDF4:
 
 Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
 
-.. code-block:: bash
+.. code-block:: console
 
     alias rm="rm -i"
 
@@ -372,7 +372,7 @@ Shared Persistent Storage
 
 Confirm that the :ref:`PersistentSharedStorage` volume is attached on ``vdc`` with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo lsblk -f
 
@@ -391,7 +391,7 @@ The expected output is like:
 
 Format the volume with an `ext4` file system and confirm:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo mkfs.ext4 /dev/vdc
     $ sudo lsblk -f
@@ -412,7 +412,7 @@ Create the :file:`/nemoShare/` mount point,
 mount the volume,
 and set the owner and group:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo mkdir /nemoShare
     $ sudo mount /dev/vdc /nemoShare
@@ -422,7 +422,7 @@ Set up the NFS server service to provide access to the shared storage on the com
 
 Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo mkdir -p /export/MEOPAR
     $ sudo mount --bind /nemoShare/MEOPAR /export/MEOPAR
@@ -442,7 +442,7 @@ Add the following lines to :file:`/etc/exports`:
 
 Restart the NFS service:
 
-  .. code-block:: bash
+  .. code-block:: console
 
     $ sudo systemctl start nfs-kernel-server.service
 
@@ -452,7 +452,7 @@ Compute Node Template
 
 Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance` that you launched above with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
@@ -460,7 +460,7 @@ Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInsta
 
 Set the timezone with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo timedatectl set-timezone America/Vancouver
 
@@ -469,13 +469,13 @@ time,
 time zone,
 and that the ``systemd-timesyncd.service`` is activate with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ timedatectl status
 
 Provision the :ref:`HeadNodeInstance` with the following packages:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo apt update
     $ sudo apt install -y gfortran
@@ -487,7 +487,7 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
 Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
 and export environment variables to enable wwatch3 to use netCDF4:
 
-.. code-block:: bash
+.. code-block:: console
 
     # Add wwatch3 bin/ and exe/ paths to PATH if they exist
     if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
@@ -503,14 +503,14 @@ and export environment variables to enable wwatch3 to use netCDF4:
 
 Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
 
-.. code-block:: bash
+.. code-block:: console
 
     alias rm="rm -i"
 
 Create the :file:`/nemoShare/` mount point,
 and set the owner and group:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
@@ -518,7 +518,7 @@ and set the owner and group:
 From the head node,
 copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the compute node:
 
-.. code-block:: bash
+.. code-block:: console
 
     # on nowcast0
     $ ssh-copy-id -f -i $HOME/.ssh/id_rsa nowcast1
@@ -620,7 +620,7 @@ Git Repositories
 
 Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ git clone git@github.com:SalishSeaCast/grid.git
@@ -644,7 +644,7 @@ Build XIOS-2
 
 Symlink the XIOS-2 build configuration files for ``arbutus.cloud`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/COMPUTECANADA/arch-GCC_ARBUTUS.fcm
@@ -652,7 +652,7 @@ Symlink the XIOS-2 build configuration files for ``arbutus.cloud`` from the :fil
 
 Build XIOS-2 with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2
     $ ./make_xios --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 8
@@ -663,7 +663,7 @@ Build NEMO-3.6
 
 Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
     $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast -j8
@@ -682,7 +682,7 @@ Access to download WAVEWATCH III :sup:`®`
 code tarballs is obtained by sending an email request from the https://polar.ncep.noaa.gov/waves/wavewatch/license.shtml.
 The eventual reply will provide a username and password that can be used to access https://polar.ncep.noaa.gov/waves/wavewatch/distribution/ from which the :file:`wwatch3.v5.16.tar.gz` files can be downloaded with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ curl -u username:password -LO download_url
@@ -696,7 +696,7 @@ that will use the :program:`gfortran` and :program:`gcc` compilers:
 
 .. _wwatch3 manual: https://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16
@@ -715,7 +715,7 @@ Ensure that :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` and :file:`/n
 Change the :file:`comp` and :file:`link` scripts in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` to point to :file:`comp.gnu` and :file:`link.gnu`,
 and make :file:`comp.gnu` executable:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
     $ ln -sf comp.gnu comp && chmod +x comp.gnu
@@ -723,21 +723,21 @@ and make :file:`comp.gnu` executable:
 
 Symlink the :file:`SalishSeaWaves/switch` file in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
     $ ln -sf /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/switch switch
 
 Export the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
 
-.. code-block:: bash
+.. code-block:: console
 
     export WWATCH3_NETCDF=NC4
     export NETCDF_CONFIG=$(which nc-config)
 
 Build the suite of wwatch3 programs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/work
     $ w3_make
@@ -751,7 +751,7 @@ Install the `Miniforge-pypy3`_ environment and package manager:
 .. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
 
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ curl -LO https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge-pypy3-Linux-x86_64.sh
@@ -763,7 +763,7 @@ Answer ``yes`` when the install asks :guilabel:`Do you wish to update your shell
 
 The Python packages that the system depends on are installed in a conda environment with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ mamba env create \
@@ -783,7 +783,7 @@ Environment Variables
 
 Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/nowcast-env
     $ mkdir -p etc/conda/activate.d
@@ -798,7 +798,7 @@ Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env`
 
 and :command:`unset` them when it is deactivated.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p etc/conda/deactivate.d
     $ cat << EOF > etc/conda/deactivate.d/envvars.sh
@@ -818,7 +818,7 @@ NEMO Runs Directory
 
 Create a :file:`runs/` directory for the NEMO runs and populate it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ mkdir -p logs/nowcast/
@@ -842,7 +842,7 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
 * The wwatch3 grid:
 
-  .. code-block:: bash
+  .. code-block:: console
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/grid
       $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
@@ -855,7 +855,7 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
 * Directory for wind forcing:
 
-  .. code-block:: bash
+  .. code-block:: console
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind
 
@@ -872,7 +872,7 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
 * Directory for current forcing:
 
-  .. code-block:: bash
+  .. code-block:: console
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current
 
@@ -896,7 +896,7 @@ Here are some useful bash loop one-liners for operating on collections of comput
 If compute node instances are group-launched,
 their hostnames can be set with:
 
-.. code-block:: bash
+.. code-block:: console
 
     for n in {1..8}
     do
@@ -906,7 +906,7 @@ their hostnames can be set with:
 
 Mount shared storage via NFS from head node:
 
-.. code-block:: bash
+.. code-block:: console
 
     for n in {1..8}
     do
@@ -917,7 +917,7 @@ Mount shared storage via NFS from head node:
 
 Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
 
-.. code-block:: bash
+.. code-block:: console
 
     for n in {1..8}
     do
@@ -927,7 +927,7 @@ Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
 
 Confirm that :file:`/nemoShare/MEOPAR/` has the shared storage mounts:
 
-.. code-block:: bash
+.. code-block:: console
 
     for n in {1..8}
     do

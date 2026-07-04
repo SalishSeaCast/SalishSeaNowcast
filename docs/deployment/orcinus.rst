@@ -31,7 +31,7 @@ temporary run directories,
 and results directories,
 and set their groups and permissions:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /home/dlatorne/nowcast-agrif-sys/runs
     $ chgrp wg-moad /home/dlatorne/nowcast-agrif-sys/
@@ -47,7 +47,7 @@ Clone Git Repositories
 
 Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/
     $ git clone git@github.com:SalishSeaCast/grid.git
@@ -67,7 +67,7 @@ Build XIOS-2
 
 Symlink the XIOS-2 build configuration files for ``orcinus`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-X64_ORCINUS.fcm
@@ -75,7 +75,7 @@ Symlink the XIOS-2 build configuration files for ``orcinus`` from the :file:`XIO
 
 and build XIOS-2 with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
     $ ./make_xios --arch X64_ORCINUS --netcdf_lib netcdf4_seq --job 8
@@ -84,10 +84,10 @@ and build XIOS-2 with:
 
 To clear away all artifacts of a previous build of XIOS-2 use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
-    ./tools/FCM/bin/fcm build --clean
+    $ cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
+    $ ./tools/FCM/bin/fcm build --clean
 
 
 Build NEMO-3.6
@@ -95,7 +95,7 @@ Build NEMO-3.6
 
 Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/NEMO-3.6-code/NEMOGCM/CONFIG
     $ ./makenemo -m X64_ORCINUS -n SMELTAGRIF -j8
@@ -108,7 +108,7 @@ Install Python Packages
 
 The Python packages that the system depends on are installed as user packages in :file:`/home/dlatorne/.local/bin/` with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/
     $ python3 -m pip install --user --editable NEMO-Cmd/
@@ -120,7 +120,7 @@ Populate Run Preparation Directory Tree
 
 Copy the :file:`namelist.time` namelist section files from the :file:`SS-run-sets` repo clone into the :file:`/home/dlatorne/nowcast-agrif-sys/runs/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/runs/
     $ cp ../SS-run-sets/v201702/smelt-agrif/namelist.time.template namelist.time
@@ -129,14 +129,14 @@ Copy the :file:`namelist.time` namelist section files from the :file:`SS-run-set
 
 Symlink the run description YAML template files from the :file:`SS-run-sets` repo clone into the :file:`/home/dlatorne/nowcast-agrif-sys/runs/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/runs/
     $ ln -s ../SS-run-sets/v201702/smelt-agrif/orcinus_nowcast_template.yaml nowcast-agrif_template.yaml
 
 Create and populate forcing sub-directories with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /home/dlatorne/nowcast-agrif-sys/runs/
     $ mkdir -p LiveOcean NEMO-atmos rivers ssh
@@ -159,7 +159,7 @@ Build Nesting Tools
 
 Clone Michael Dunphies' debugged version of the nesting tools for AGRIF from :file:`NEMO-3.6-code/NEMOGCM/TOOLS/NESTING/` on to ``salish``:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh salish
     $ cd /data/dlatorne/MEOPAR/
@@ -167,7 +167,7 @@ Clone Michael Dunphies' debugged version of the nesting tools for AGRIF from :fi
 
 Build the nesting tools suite of Fortran programs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS
     $ ./maketools -n NESTING -m GCC_SALISH
@@ -178,7 +178,7 @@ Generate Sub-grid Files
 
 Set up a working directory tree in which to generate the sub-grid files:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/
     $ mkdir -p agrif-nesting/BaynesSound agrif-nesting/HaroStrait
@@ -199,7 +199,7 @@ use :program:`agrif_create_coordinates.exe` to create the sub-grid coordinates f
 (path provided in the :file:`namelist.nesting.BaynesSound` file),
 and add it to the ``grid`` repo:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
@@ -213,7 +213,7 @@ and add it to the ``grid`` repo:
 
 Similarly for the Haro Strait sub-grid:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
@@ -233,7 +233,7 @@ Bathymetry
     Need to understand the details of how sub-grid bathymetries are generated.
     They appear to be based on :file:`/home/mdunphy/MEOPAR/WORK/Bathy-201702/BC3/BC3_For_Nesting_Tools.nc` and a ``bathymetry`` namelist like:
 
-    .. code-block:: bash
+    .. code-block:: fortran
 
         &bathymetry
             new_topo = true
@@ -262,7 +262,7 @@ we can construct an acceptable rivers biological tracers forcing file for the Ba
 Calculate the :file:`rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc`,
 and add it to the ``rivers-climatology`` repo:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd rivers-climatology/bio
     $ mkdir -p ../subgrids/BaynesSound/bio
@@ -283,7 +283,7 @@ For the Baynes Sound sub-grid,
 use :program:`agrif_create_restart.exe` to create the sub-grid physics restart file from the full domain physics restart file,
 and upload both files to the appropriate run results directory on :`s``:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
@@ -297,7 +297,7 @@ Note that the time step number in the Baynes Sound sub-grid restart file name is
 
 Similarly for the Haro Strait sub-grid:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
@@ -318,7 +318,7 @@ For the Baynes Sound sub-grid,
 use :program:`agrif_create_restart_trc.exe` to create the sub-grid tracer restart file from the full domain tracer restart file,
 and upload both files to the appropriate run results directory on :`s``:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
@@ -333,7 +333,7 @@ Note that the time step number in the Baynes Sound sub-grid restart file name is
 For Haro Strait,
 start by using :program:`agrif_create_restart_trc.exe` to create the sub-grid tracer restart file from the full domain tracer restart file:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
@@ -344,7 +344,7 @@ For some reason :program:`agrif_create_restart_trc.exe` fails to store the varia
 in the file it produces.
 To deal with that we duplicate the ``TRNTRA`` field values as ``TRBTRA`` and append that variable to the file:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ncks -4 -O -v TRNTRA 1_SalishSea_02935440_restart_trc.nc TRNTRA.nc
     $ ncks -4 -O 1_SalishSea_02935440_restart_trc.nc 1_SalishSea_02935440_restart_trc.nc
@@ -353,7 +353,7 @@ To deal with that we duplicate the ``TRNTRA`` field values as ``TRBTRA`` and app
 
 and upload the file to the appropriate run results directory on :`s``:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ scp 1_SalishSea_02935440_restart_trc.nc \
         orcinus:/global/scratch/dlatorne/nowcast-agrif/12may18/1_SalishSea_11741760_restart_trc.nc

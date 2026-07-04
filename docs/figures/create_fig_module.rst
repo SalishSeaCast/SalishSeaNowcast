@@ -877,6 +877,6 @@ The ``SalishSeaNowcast`` package uses the `black`_ code formatting tool to maint
 Before each commit of your figure module please run :program:`black` to automatically format your code.
 For our example :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surface` module the command would be:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ black nowcast/figures/research/tracer_thalweg_and_surface.py
