@@ -65,7 +65,7 @@ in a directory like :file:`MEOPAR/`,
 and with the capitalization shown on the left above,
 you can create and activate a figures development environment with these commands:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd SalishSeaNowcast
     $ conda env create -f envs/environment-fig-dev.yaml
@@ -83,6 +83,6 @@ The ``--editable`` option in the :command:`pip install` command above installs t
 
 To deactivate the environment use:
 
-.. code-block:: bash
+.. code-block:: console
 
     (nowcast-fig-dev)$ conda deactivate

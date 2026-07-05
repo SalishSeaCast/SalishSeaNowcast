@@ -46,7 +46,7 @@ So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast file
 
 Start the nowcast system and sarracenia client with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ supervisord --configuration $NOWCAST_CONFIG/supervisord.ini
@@ -56,7 +56,7 @@ Start the nowcast system and sarracenia client with:
 The https://salishsea.eos.ubc.ca website app is also managed by `supervisor`_.
 Start it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate /SalishSeaCast/salishsea-site-env
     (/SalishSeaCast/salishsea-site-env)$ supervisord --configuration $SALISHSEA_SITE/supervisord-prod.ini
@@ -68,7 +68,7 @@ System Management
 `supervisorctl`_ is the command-line interface for interacting with the processes that are running under :command:`supervisord`.
 Start it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini
@@ -102,14 +102,14 @@ Use ``quit`` or ``exit`` to exit from :command:`supervisorctl`.
 :command:`sr_subscribe` is run in ``foreground`` mode instead of daemonized so that it can be managed by ::command:`supervisord`.
 Use :command:`supervisorctl` to view the :command:`sr_subscribe` log files:\
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini tail sr_subscribe-hrdps-west
 
 or
 
-.. code-block:: bash
+.. code-block:: console
 
     (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini tail sr_subscribe-hydrometric
 

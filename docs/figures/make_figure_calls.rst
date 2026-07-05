@@ -33,7 +33,7 @@ We'll use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figu
 You should run your test notebooks and :py:mod:`~nowcast.workers.make_plots` worker tests in a :ref:`NowcastFiguresDevEnv`.
 You can activate it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ source activate nowcast-fig-dev
 
@@ -192,7 +192,7 @@ We can test that we have set up the necessary dataset loading and registered our
    activate your :ref:`NowcastFiguresDevEnv`,
    and navigate to your :file:`SalishSeaNowcast/` directory:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ source activate nowcast-fig-dev
        (nowcast-fig-dev)$ cd SalishSeaNowcast/
@@ -200,7 +200,7 @@ We can test that we have set up the necessary dataset loading and registered our
 #. Set up 2 environment variables that the nowcast system expects to find,
    and create a temporary logging directory for it to use:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (nowcast-fig-dev)$ export NOWCAST_LOGS=/tmp/$USER
        (nowcast-fig-dev)$ export NOWCAST_ENV=$CONDA_PREFIX
@@ -209,7 +209,7 @@ We can test that we have set up the necessary dataset loading and registered our
 
 #. Run the :py:mod:`make_plots` worker:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (nowcast-fig-dev)$ python -m nowcast.workers.make_plots config/nowcast.yaml nowcast-green research --debug --test-figure nitrate_thalweg_and_surface --run-date 2017-04-29
 
@@ -225,24 +225,33 @@ We can test that we have set up the necessary dataset loading and registered our
    * ``nitrate_thalweg_and_surface``, the key of the :py:func:`make_figure` call to test
    * ``--run-date``, to say what date's run results to render the figure for
 
-   The output of a successful test should look something like::
+   The output of a successful test should look something like:
 
-     2017-05-05 17:11:16,119 INFO [make_plots] running in process 2993
-     2017-05-05 17:11:16,120 INFO [make_plots] read config from config/nowcast.yaml
-     2017-05-05 17:11:16,120 DEBUG [make_plots] **debug mode** no connection to manager
-     2017-05-05 17:11:16,358 DEBUG [make_plots] starting nowcast.figures.research.tracer_thalweg_and_surface.make_figure
-     2017-05-05 17:11:18,645 INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
-     2017-05-05 17:11:18,646 INFO [make_plots] research plots for 2017-04-29 nowcast-green completed
-     2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green research plots produced)
-     2017-05-05 17:11:18,647 DEBUG [make_plots] shutting down
+   .. code-block:: text
+      :class: no-copybutton
 
-   It is particularly important that your output contains the line that tells you that your figure was saved::
+      2017-05-05 17:11:16,119 INFO [make_plots] running in process 2993
+      2017-05-05 17:11:16,120 INFO [make_plots] read config from config/nowcast.yaml
+      2017-05-05 17:11:16,120 DEBUG [make_plots] **debug mode** no connection to manager
+      2017-05-05 17:11:16,358 DEBUG [make_plots] starting nowcast.figures.research.tracer_thalweg_and_surface.make_figure
+      2017-05-05 17:11:18,645 INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+      2017-05-05 17:11:18,646 INFO [make_plots] research plots for 2017-04-29 nowcast-green completed
+      2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green research plots produced)
+      2017-05-05 17:11:18,647 DEBUG [make_plots] shutting down
 
-     INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+   It is particularly important that your output contains the line that tells you that your figure was saved:
 
-   You can transform that path into a URL like::
+   .. code-block:: text
+      :class: no-copybutton
 
-     https://salishsea.eos.ubc.ca/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg
+      INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+
+   You can transform that path into a URL like:
+
+   .. code-block:: text
+      :class: no-copybutton
+
+      https://salishsea.eos.ubc.ca/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg
 
    and visually check your figure in your browser.
 

@@ -101,7 +101,7 @@ Clone the code and documentation `repository`_ from GitHub with:
 
 .. _repository: https://github.com/SalishSeaCast/SalishSeaNowcast
 
-.. code-block:: bash
+.. code-block:: console
 
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
 
@@ -136,7 +136,7 @@ and building the documentation with the commands below.
 If you have not done so already,
 you can clone those repos with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd SalishSeaNowcast/..
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
@@ -152,7 +152,7 @@ please ensure that they are up to date.
 Assuming that those repos are cloned beside your ``SalishSeaNowcast`` clone,
 the commands below install the packages into your ``salishsea-nowcast`` development environment.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd SalishSeaNowcast
     $ conda env create -f envs/environment-dev.yaml
@@ -169,7 +169,7 @@ The ``--editable`` option in the :command:`pip install` command above installs t
 
 To deactivate the environment use:
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ conda deactivate
 
@@ -197,7 +197,7 @@ To install the `pre-commit` hooks in a newly cloned repo,
 activate the conda development environment,
 and run :command:`pre-commit install`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd SalishSeaNowcast
     $ conda activate salishsea-nowcast
@@ -228,7 +228,7 @@ use:
 .. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ (cd docs && make clean html)
 
@@ -236,6 +236,7 @@ to do a clean build of the documentation.
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     Removing everything under '_build'...
     Running Sphinx v8.1.3
@@ -298,14 +299,15 @@ Sphinx also provides a link checker utility which can be run to find broken or r
 With your ``salishsea-nowcast`` environment activated,
 use:
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ cd SalishSeaNowcast/docs/
-    (salishsea-nowcast) docs$ make linkcheck
+    (salishsea-nowcast)$ make linkcheck
 
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     Removing everything under '_build'...
     Running Sphinx v8.1.3
@@ -507,7 +509,7 @@ The `pytest`_ tool is used for test parametrization and as the test runner for t
 With your ``salishsea-nowcast`` development environment activated,
 use:
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ cd SalishSeaNowcast/
     (salishsea-nowcast)$ pytest
@@ -516,6 +518,7 @@ to run the test suite.
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     ================================ test session starts =================================
     platform linux -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0
@@ -533,7 +536,7 @@ The output looks something like:
     tests/workers/test_watch_NEMO_hindcast.py ...........................................
     ..................                                                             [  7%]
     tests/workers/test_update_forecast_datasets.py ......................................
-`   ................................                                               [ 10%]
+    ................................                                               [ 10%]
     tests/release_mgmt/test_tag_release.py .........                               [ 11%]
     tests/workers/test_make_ww3_wind_file.py ........................              [ 12%]
     tests/workers/test_make_CHS_currents_file.py ........................          [ 13%]
@@ -598,7 +601,7 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 .. _coverage.py: https://coverage.readthedocs.io/en/latest/
 .. _pytest-cov: https://pytest-cov.readthedocs.io/en/latest/
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ cd SalishSeaNowcast/
     (salishsea-nowcast)$ pytest --cov=./
@@ -608,7 +611,7 @@ The test coverage report will be displayed below the test suite run output.
 Alternatively,
 you can use
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishsea-nowcast)$ pytest --cov=./ --cov-report html
 

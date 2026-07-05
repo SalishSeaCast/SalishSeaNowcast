@@ -34,7 +34,6 @@ https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/f
 
 Development notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
-
 """
 
 from types import SimpleNamespace

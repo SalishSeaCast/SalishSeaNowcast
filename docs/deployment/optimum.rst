@@ -31,10 +31,12 @@ the value of :envvar:`HOME` is :file:`/home/sallen/dlatorne`.
 Environment Variables
 =====================
 
-Add these environment variable definitions to :file:`$HOME/.bash_profile`::
+Add these environment variable definitions to :file:`$HOME/.bash_profile`:
 
-  export FORCING=/data/sallen/shared
-  export PROJECT=/home/sallen/dlatorne
+.. code-block:: console
+
+   export FORCING=/data/sallen/shared
+   export PROJECT=/home/sallen/dlatorne
 
 ``optimum`` provides automatically defined environment variables for:
 
@@ -51,10 +53,12 @@ Add these environment variable definitions to :file:`$HOME/.bash_profile`::
 Module Loads
 ============
 
-The default module loads to use on ``optimum`` are::
+The default module loads to use on ``optimum`` are:
 
-  module load OpenMPI/2.1.6/GCC/SYSTEM
-  module load GIT/2/03.03
+.. code-block:: console
+
+   module load OpenMPI/2.1.6/GCC/SYSTEM
+   module load GIT/2/03.03
 
 Loading of those modules is included in :file:`$HOME/.bashrc`.
 
@@ -62,14 +66,16 @@ There is a ``Miniconda/3`` module available for building Python Conda environmen
 Conda environments created with that module loaded are stored in :file:`$HOME/.conda/envs/`.
 
 There is something funky about :program:`REBUILD_NEMO` and the way it uses netCDF that requires a different collection of modules in order to avoid a run-time error about netCDF4 operations on netCDF3 files
-(or vice versa)::
+(or vice versa):
 
-  module load GCC/8.3
-  module load OpenMPI/2.1.6/GCC/8.3
-  module load ZLIB/1.2/11
-  module load use.paustin
-  module load HDF5/1.08/20
-  module load NETCDF/4.6/1
+.. code-block:: console
+
+   module load GCC/8.3
+   module load OpenMPI/2.1.6/GCC/8.3
+   module load ZLIB/1.2/11
+   module load use.paustin
+   module load HDF5/1.08/20
+   module load NETCDF/4.6/1
 
 .. warning::
     The above module loads can *only be used* for build and execution of :program:`REBUILD_NEMO`.
@@ -86,14 +92,14 @@ Create directory trees for the run preparation directory,
 Git repositories,
 and temporary run directories:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p $PROJECT/SalishSeaCast/hindcast-sys/runs
 
 Store results directories in a tree in :envvar:`SCRATCHDIR`,
 for example:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p #SCRATCHDIR/hindcast.201905/
     $ chmod g+ws #SCRATCHDIR/hindcast.201905/
@@ -104,7 +110,7 @@ Clone Git Repositories
 
 Clone the following repos into :file:`$PROJECT/SalishSeaCast/hindcast-sys/`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/
     $ git clone git@github.com:SalishSeaCast/grid.git
@@ -125,7 +131,7 @@ Build XIOS-2
 
 Symlink the XIOS-2 build configuration files for ``optimum`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_OPTIMUM.env
@@ -142,13 +148,13 @@ That version is pointed to by both the ``XIOS-2r1066`` and the ``PROD-hindcast_2
 Git tags,
 so create a branch to checkout the repo at one of those tags:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ git checkout -b PROD-hindcast_201905-v3 PROD-hindcast_201905-v3
 
 and build XIOS-2 with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/XIOS-2/
     $ ./make_xios --arch GCC_OPTIMUM --netcdf_lib netcdf4_seq --job 8
@@ -157,7 +163,7 @@ and build XIOS-2 with:
 
 To clear away all artifacts of a previous build of XIOS-2 use:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/XIOS-2
     $ ./tools/FCM/bin/fcm build --clean
@@ -171,7 +177,7 @@ Create a branch to checkout the repo at an appropriate tag:
 * For hindcast runs,
   something like:
 
-  .. code-block:: bash
+  .. code-block:: console
 
       $ cd $PROJECT/SalishSeaCast/hindcast-sys/NEMO-3.6-code/
       $ git checkout -b PROD-hindcast_201905-v3 PROD-hindcast_201905-v3
@@ -179,14 +185,14 @@ Create a branch to checkout the repo at an appropriate tag:
 * For research runs,
   something like:
 
-  .. code-block:: bash
+  .. code-block:: console
 
       $ cd $PROJECT/SalishSeaCast/hindcast-sys/NEMO-3.6-code/
       $ git checkout -b fluxes fluxes
 
 Build NEMO-3.6 with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
     $ XIOS_HOME=$PROJECT/SalishSeaCast/hindcast-sys/XIOS-2/ ./makenemo -m GCC_OPTIMUM -n SalishSeaCast -j8
@@ -194,7 +200,7 @@ Build NEMO-3.6 with:
 :program:`REBUILD_NEMO` requires a different collection of modules to be loaded for build and execution.
 Build it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ module load GCC/8.3
     $ module load OpenMPI/2.1.6/GCC/8.3
@@ -211,7 +217,7 @@ Install Python Packages
 
 Load the ``Miniconda/3`` module and create a Conda environment:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ module load Miniconda/3
     $ conda create -n salishseacast -c conda-forge python=3 pip arrow \
@@ -221,7 +227,7 @@ Load the ``Miniconda/3`` module and create a Conda environment:
 
 Install the SalishSeaCast NEMO-Cmd and SalishSeaCmd packages from their repo clones:
 
-.. code-block:: bash
+.. code-block:: console
 
     (salishseacast)$ cd $PROJECT/SalishSeaCast/hindcast-sys/
     (salishseacast)$ python -m pip install --editable NEMO-Cmd/
@@ -233,21 +239,21 @@ Populate Run Preparation Directory
 
 Copy the :file:`namelist.time` namelist section template file from the :file:`SS-run-sets` repo clone into the :file:`$PROJECT/SalishSeaCast/hindcast-sys/runs/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/runs/
     $ cp ../SS-run-sets/v201905/hindcast/namelist.time_template namelist.time
 
 Symlink the run description YAML template file from the :file:`SS-run-sets` repo clone into the :file:`$PROJECT/SalishSeaCast/hindcast-sys/runs/` directory:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/runs/
     $ ln -s ../SS-run-sets/v201905/hindcast/optimum_hindcast_template.yaml hindcast_template.yaml
 
 Create and populate forcing directory trees with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p $FORCING/SalishSeaCast/forcing/atmospheric/GEM2.5/gemlam
     $ mkdir -p $FORCING/SalishSeaCast/forcing/atmospheric/GEM2.5/operational

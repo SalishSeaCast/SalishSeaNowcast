@@ -27,7 +27,7 @@ Git Repositories
 
 Clone the following repos into :file:`/SalishSeaCast/`:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/
     $ git clone git@github.com:SalishSeaCast/grid.git
@@ -62,7 +62,7 @@ The Python packages that the system depends on are installed in conda environmen
 
 For the ``SalishSeaCast`` automation system:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/
     $ mamba env create \
@@ -83,7 +83,7 @@ rivers hydrometric files from the `ECCC MSC datamart service`_:
 .. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/
     $ mamba env create \
@@ -96,7 +96,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 
 .. _salishsea-site web app: https://github.com/SalishSeaCast/salishsea-site
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast
     $ mamba env create \
@@ -116,7 +116,7 @@ Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to
 automatically :command:`export` the environment variables required by the nowcast system
 when the environment is activated:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/nowcast-env
     $ mkdir -p etc/conda/activate.d
@@ -136,7 +136,7 @@ when the environment is activated:
 
 and :command:`unset` them when it is deactivated.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p etc/conda/deactivate.d
     $ cat << EOF > etc/conda/deactivate.d/envvars.sh
@@ -164,7 +164,7 @@ sarracenia client when the environment is activated and :command:`unset` them wh
 environment is deactivated.
 To see the variables and their values:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/sarracenia-env
     $ source activate /SalishSeaCast/salishsea-site-env
@@ -178,7 +178,7 @@ Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environ
 automatically :command:`export` the environment variables required by the
 https://salishsea.eos.ubc.ca website app when the environment is activated:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ cd /SalishSeaCast/salishsea-site-env
     $ mkdir -p etc/conda/activate.d
@@ -193,7 +193,7 @@ https://salishsea.eos.ubc.ca website app when the environment is activated:
 
 and :command:`unset` them when it is deactivated.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p etc/conda/deactivate.d
     $ cat << EOF > etc/conda/deactivate.d/envvars.sh
@@ -212,7 +212,7 @@ Nowcast Runs Directories
 On the hosts where the nowcast system NEMO runs will be executed create a
 :file:`runs/` directory and populate it with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ chmod g+ws runs
     $ cd runs/
@@ -239,7 +239,7 @@ ECCC MSC Datamart Mirror Directories
 Create directories on ``skookum`` for storage of the HRDPS forecast files and
 rivers hydrometric files maintained by the `sarracenia client`_:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /SalishSeaCast/datamart/hrdps-west
     $ mkdir -p /SalishSeaCast/datamart/hydrometric
@@ -251,7 +251,7 @@ Logging Directories
 Create directories on ``skookum`` for storage of the nowcast system and
 `salishsea-site web app`_ log files:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /SalishSeaCast/logs/nowcast
     $ mkdir -p /SalishSeaCast/logs/salishsea-site
@@ -265,7 +265,7 @@ A collection of static file assets for the `salishsea-site web app`_ are stored 
 Create the that directory,
 and the directories for results visualization figures from the NEMO model runs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures
     $ chmod g+ws /results/nowcast-sys/figures
@@ -280,7 +280,7 @@ and the directories for results visualization figures from the NEMO model runs w
 Create directories for results visualization figures from the
 FVCOM Vancouver Harbour and Lower Fraser River model runs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures/fvcom/forecast-x2
     $ mkdir -p /results/nowcast-sys/figures/fvcom/nowcast-r12
@@ -289,7 +289,7 @@ FVCOM Vancouver Harbour and Lower Fraser River model runs with:
 Create directories for results visualization figures from the
 WaveWatch III® Strait of Georgia amd Juan de Fuca Strait wave model runs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast
     $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast2
@@ -297,13 +297,13 @@ WaveWatch III® Strait of Georgia amd Juan de Fuca Strait wave model runs with:
 Create a directory for visualization figures generated during preparation of the
 forcing files for the NEMO model runs with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures/monitoring
 
 Create a directory for storm surge alert ATOM feed with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures/storm-surge/atom
 
@@ -311,7 +311,7 @@ Finally,
 create a directory and symlinks for the images used on the index page of
 https://salishsea.eos.ubc.ca/ with:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mkdir -p /results/nowcast-sys/figures/salishsea-site/static/img/index_page
     $ cd /results/nowcast-sys/figures/salishsea-site/static/img/index_page
@@ -340,7 +340,7 @@ we use a persistent dask cluster on ``salish`` that the worker dispatches tasks 
 
 Create a :program:`tmux` session on ``salish`` for the dask cluster:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ tmux new -s make_averaged_dataset
 
@@ -349,7 +349,7 @@ activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the :command:`dask-scheduler` with its serving port on 4386,
 and its dashboard port on 4387:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mamba activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
@@ -366,7 +366,7 @@ and launch the 4 :command:`dask worker` processes with these properties:
 * workers restart every 3600 seconds with 60 second random staggering of their restart times
 * workers communicate with the scheduler on port 4386
 
-.. code-block:: bash
+.. code-block:: console
 
     $ mamba activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
@@ -383,7 +383,7 @@ Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers`
 
 Generate a passphrase-less RSA key pair to use for connections to most remote hosts:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh-keygen -t rsa -f $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa -C SalishSeaNEMO-nowcast
 
@@ -392,15 +392,15 @@ Use :command:`ssh-copy-id` to install the public key on ``arbutus``,
 and ``orcinus``;
 e.g.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ ssh-copy-id -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
 
 Generate a passphrase-less ED25519 key pair to use for connections to the ``nibi`` HPC cluster:
 
-.. code-block:: bash
+.. code-block:: console
 
-    ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.nibi_ed25519 -C "SalishSeaCast robot.nibi"
+    $ ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.nibi_ed25519 -C "SalishSeaCast robot.nibi"
 
 Edit the public key to prefix it with the constraint predicates necessary for automation in the
 context of multuifactor authentication on the ``nibi`` cluster.

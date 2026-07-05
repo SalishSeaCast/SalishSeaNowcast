@@ -75,7 +75,7 @@ then run the worker as follows:
    activate the production nowcast :program:`conda` environment,
    and navigate to the nowcast configuration and logging directory:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ ssh skookum
        skookum$ conda activate /SalishSeaCast/nowcast-env
@@ -84,7 +84,7 @@ then run the worker as follows:
    for the appropriate forecast with debug logging,
    for example:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        (/SalishSeaCast/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 2.5km --debug
 
@@ -96,6 +96,7 @@ then run the worker as follows:
    The (abridged) output should look like:
 
    .. code-block:: text
+      :class: no-copybutton
 
         2023-02-24 10:18:07,831 INFO [download_weather] running in process 3006
         2023-02-24 10:18:07,831 INFO [download_weather] read config from /SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
@@ -117,11 +118,12 @@ You can use the ``-h`` or ``--help`` flags to get a usage message that explains
 the worker's required arguments,
 and its option flags:
 
-.. code-block:: bash
+.. code-block:: console
 
     (nowcast)$ python -m nowcast.workers.download_weather --help
 
 .. code-block:: text
+   :class: no-copybutton
 
     usage: python -m nowcast.workers.download_weather [-h] [--debug] [--run-date RUN_DATE]
            [--no-verify-certs] config_file {12,06,00,18} {1km,2.5km}
@@ -165,7 +167,7 @@ That can be accomplished as follows:
 #. Activate your nowcast :program:`conda` environment,
    and navigate to your nowcast development and testing environment:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ source activate salishsea-nowcast
        (nowcast)$ cd MEOPAR/nowcast/
@@ -186,7 +188,7 @@ That can be accomplished as follows:
         The directory :file:`/ocean/<your_userid>/MEOPAR/GRIB/` must exist.
         Create it if necessary with:
 
-        .. code-block:: bash
+        .. code-block:: console
 
             $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
 
