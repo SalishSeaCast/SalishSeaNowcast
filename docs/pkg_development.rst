@@ -511,7 +511,7 @@ Use:
 .. code-block:: console
 
     $ cd SalishSeaNowcast/
-    $ pixi run pytest
+    $ pixi run -e test pytest
 
 to run the test suite.
 The output looks something like:
@@ -603,7 +603,7 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 .. code-block:: console
 
     $ cd SalishSeaNowcast/
-    $ pixi run pytest-cov
+    $ pixi run -e test pytest-cov
 
 The test coverage report will be displayed below the test suite run output.
 
@@ -612,7 +612,7 @@ you can use
 
 .. code-block:: console
 
-    $ pixi run pytest-cov-html
+    $ pixi run -e test pytest-cov-html
 
 to produce an HTML report that you can view in your browser by opening :file:`SalishSeaNowcast/htmlcov/index.html`.
 
