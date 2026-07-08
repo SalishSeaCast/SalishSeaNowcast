@@ -261,7 +261,7 @@ class _QstatHindcastJob:
         try:
             queue_info = self._get_queue_info()
             state = queue_info.split()[9]
-        except (WorkerError, AttributeError):
+        except WorkerError, AttributeError:
             # job has disappeared from the queue; finished or cancelled
             logger.info(
                 f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"
@@ -506,7 +506,7 @@ class _SqueueHindcastJob:
         try:
             queue_info = self._get_queue_info()
             state = queue_info.split()[2]
-        except (WorkerError, AttributeError):
+        except WorkerError, AttributeError:
             # job has disappeared from the queue; finished or cancelled
             logger.info(
                 f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"

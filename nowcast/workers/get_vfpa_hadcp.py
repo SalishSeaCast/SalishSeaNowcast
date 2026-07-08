@@ -134,7 +134,7 @@ def get_vfpa_hadcp(parsed_args, config, *args):
             with xarray.open_dataset(nc_filepath) as stored_ds:
                 ds = _make_hour_dataset(csv_dir, hr, place)
                 extended_ds = xarray.concat((stored_ds, ds), dim="time")
-        except (ValueError, FileNotFoundError):
+        except ValueError, FileNotFoundError:
             # Skip missing hour
             logger.debug(f"no data for {hr.format('YYYY-MM-DD HH:mm')} hour")
             continue

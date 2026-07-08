@@ -114,7 +114,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
     shared.localize_time(wwatch3)
     try:
         shared.localize_time(obs)
-    except (IndexError, AttributeError):
+    except IndexError, AttributeError:
         # No observations available, but we still want to plot the model results
         obs = None
     return SimpleNamespace(wwatch3=wwatch3, obs=obs)
