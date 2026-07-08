@@ -111,16 +111,40 @@ Clone the code and documentation `repository`_ from GitHub with:
 Development Environment
 =======================
 
-Setting up an isolated development environment using `Conda`_ is recommended.
-Assuming that you have `Miniconda`_ installed,
-you can create and activate an environment called ``salishsea-nowcast`` that will have all of the Python packages necessary for development,
-testing,
-and building the documentation with the commands below.
+:py:obj:`SalishSeaNowcast` uses Pixi_ for package and environment management.
+If you don't already have Pixi_ installed,
+please follow its `installation instructions`_ to do so.
 
-.. _Conda: https://docs.conda.io/en/latest/
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+.. _Pixi: https://pixi.prefix.dev/latest/
+.. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-``SalishSeaNowcast`` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
+Use :command:`pixi install` command to download the package dependencies and link them into environments.
+
+Most commands are executed using :command:`pixi run` in the :file:`SalishSeaNowcast/` directory
+(or a sub-directory).
+
+* The ``default`` environment has the packages installed that are required to run the
+  :py:obj:`Reshapr` command-line interface;
+  e.g. :command:`pixi run reshapr help`
+
+* Other environments used by commands in the sections below have addition packages for running
+  the test suite,
+  building and link checking the documentation,
+  etc.
+
+* If you are using an integrated development environment like VSCode or PyCharm
+  where you need a Python interpreter to support coding assistance features,
+  run development tasks,
+  etc.,
+  use the interpreter in the ``dev`` environment.
+  You can get its full path with :command:`pixi run -e dev which python`
+
+You can launch a sub-shell in one of the environments with a command like :command:`pixi shell -e dev`.
+That is convenient if you are running a lot of commands because it removed the need to type
+:command:`pixi run -e dev` before each of them.
+Use :command:`exit` to leave the sub-shell.
+
+:py:obj:`SalishSeaNowcast` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
 
 * `NEMO_Nowcast`_
 * `moad_tools`_
@@ -133,45 +157,19 @@ and building the documentation with the commands below.
 .. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
 
-If you have not done so already,
-you can clone those repos with:
+Those packages are installed by the :command:`pixi install` command.
 
-.. code-block:: console
+To get detailed information about the environments,
+the packages installed in them,
+`Pixi`_ tasks that are defined for them,
+etc.,
+use :command:`pixi info`.
 
-    $ cd SalishSeaNowcast/..
-    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
-    $ git clone git@github.com:UBC-MOAD/moad_tools.git
-    $ git clone git@github.com:UBC-MOAD/Reshapr.git
-    $ git clone git@github.com:SalishSeaCast/tools.git
-    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
-    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+:py:obj:`SalishSeaNowcast` is installed in `editable install mode`_ in all of the environments that
+`Pixi`_ creates.
+That means that changes you make to the code are immediately reflected in the environments.
 
-If you already have clones of those repos,
-please ensure that they are up to date.
-
-Assuming that those repos are cloned beside your ``SalishSeaNowcast`` clone,
-the commands below install the packages into your ``salishsea-nowcast`` development environment.
-
-.. code-block:: console
-
-    $ cd SalishSeaNowcast
-    $ conda env create -f envs/environment-dev.yaml
-    $ conda activate salishsea-nowcast
-    (salishsea-nowcast)$ python -m pip install --editable ../NEMO_Nowcast
-    (salishsea-nowcast)$ python -m pip install --editable ../moad_tools
-    (salishsea-nowcast)$ python -m pip install --editable ../Reshapr
-    (salishsea-nowcast)$ python -m pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ python -m pip install --editable ../NEMO-Cmd
-    (salishsea-nowcast)$ python -m pip install --editable ../SalishSeaCmd
-    (salishsea-nowcast)$ python -m pip install --editable .
-
-The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
-
-To deactivate the environment use:
-
-.. code-block:: console
-
-    (salishsea-nowcast)$ conda deactivate
+.. _editable install mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
 
 
 .. _SalishSeaNowcastCodingStyle:
@@ -194,14 +192,12 @@ and repo QA.
 .. _pre-commit: https://pre-commit.com/
 
 To install the `pre-commit` hooks in a newly cloned repo,
-activate the conda development environment,
-and run :command:`pre-commit install`:
+run :command:`pre-commit install`:
 
 .. code-block:: console
 
     $ cd SalishSeaNowcast
-    $ conda activate salishsea-nowcast
-    (salishsea-nowcast)$ pre-commit install
+    $ pixi run -e dev pre-commit install
 
 .. note::
     You only need to install the hooks once immediately after you make a new clone of the
