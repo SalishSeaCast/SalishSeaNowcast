@@ -42,7 +42,6 @@ dependencies = [
     # see envs/environment-prod.yaml for conda environment production installation
     # see envs/environment-dev.yaml for conda environment dev installation
     # see envs/requirements.txt for package versions used during recent development
-    # see envs/environment-rtd.yaml for conda environment used for readthedocs build
     "angles>=2.0,<3",
     "arrow",
     "beautifulsoup4",
