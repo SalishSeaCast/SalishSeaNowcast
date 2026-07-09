@@ -40,8 +40,7 @@ classifiers = [
 ]
 dependencies = [
     # see envs/environment-prod.yaml for conda environment production installation
-    # see envs/environment-dev.yaml for conda environment dev installation
-    # see envs/requirements.txt for package versions used during recent development
+    # see requirements.txt for package versions used during recent development
     "angles>=2.0,<3",
     "arrow",
     "beautifulsoup4",
@@ -245,6 +244,7 @@ pillow = "12.2.0.*"
 
 [tool.pixi.feature.dev.tasks]
 pytest = "pytest -n6 --randomly-seed=last"
+update-reqs = "python -m pip list --format=freeze >> requirements.txt"
 
 [dependency-groups]
 dev = ["sphinx-rtd-theme==3.1.0"]
