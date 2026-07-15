@@ -81,14 +81,15 @@ Testing the Website View
 ========================
 
 #. If you haven't done so already,
-   activate your :ref:`NowcastFiguresDevEnv`:
+   navigate to your :file:`SalishSeaNowcast/` directory,
+   and launch a sub-shell in the ``fig-dev`` environment,
 
    .. code-block:: console
 
-       $ source activate nowcast-fig-dev
+       $ cd SalishSeaNowcast/
+       $ pixi shell -e fig-dev
 
 #. Assuming that you have successfully run the :py:mod:`make_plots` worker :ref:`in test mode<RunningMakePlotsWorkerToTestAFigure>` for your figure,
-   navigate to your :file:`SalishSeaNowcast/` directory,
    set up the 2 environment variables that the nowcast system expects to find,
    create a temporary logging directory for it to use:
 
@@ -105,15 +106,15 @@ Testing the Website View
 
    .. code-block:: console
 
-       (nowcast-fig-dev)$ python -m nowcast.workers.make_plots config/nowcast.yaml nowcast-green research --debug --run-date 2017-05-07
+       $ python -m nowcast.workers.make_plots config/nowcast.yaml nowcast-green research --debug --run-date 2017-05-07
 
 #. Navigate to your :file:`salishsea-site/` directory,
    and launch the local website server with:
 
    .. code-block:: console
 
-       (nowcast-fig-dev)$ cd salishsea-site/
-       (nowcast-fig-dev)$ pserve --reload development.ini
+       $ cd salishsea-site/
+       $ pserve --reload development.ini
 
    You should see output like:
 

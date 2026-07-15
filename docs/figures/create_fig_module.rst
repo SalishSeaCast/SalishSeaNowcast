@@ -55,6 +55,7 @@ First we'll show the :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surfa
 and then we'll look at each section in detail.
 
 .. code-block:: python
+   :linenos:
 
     # Copyright 2013 – present by the SalishSeaCast Project contributors
     # and The University of British Columbia
@@ -287,18 +288,6 @@ and then we'll look at each section in detail.
         ax.set_axis_bgcolor('burlywood')
         viz_tools.set_aspect(ax)
         theme.set_axis_colors(ax)
-
-.. note::
-
-    Line numbers beside the code fragments in this section would be a definite improvement.
-    Unfortunately they are badly misaligned in the ``sphinx_rtd_theme`` presently deployed on readthedocs.org (v0.1.7).
-    That bug is fixed in v0.1.9,
-    broken again somewhere between that version and v0.2.4,
-    and fixed again in v0.2.5b1.
-    Until readthedocs.org updates their deployed version,
-    or allows us to specify the version,
-    we're stuck without line numbers.
-    Sorry.
 
 
 Summary of Functions in a Figure Module
@@ -879,4 +868,4 @@ For our example :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surface` m
 
 .. code-block:: console
 
-    $ black nowcast/figures/research/tracer_thalweg_and_surface.py
+    $ pixi run -e fig-dev black nowcast/figures/research/tracer_thalweg_and_surface.py

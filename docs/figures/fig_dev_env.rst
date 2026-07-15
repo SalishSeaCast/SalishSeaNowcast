@@ -22,67 +22,70 @@
 Nowcast Figures Development Environment
 ***************************************
 
-This section explains how to set up an isolated `Conda`_ environment for nowcast web site figure development and testing.
-The environment will have both the ``SalishSeaNowcast`` nowcast system package,
-and the ``salishsea-site`` web site app package installed in it,
-along with all of their dependencies.
+:py:obj:`SalishSeaNowcast` uses Pixi_ for package and environment management.
+If you don't already have Pixi_ installed,
+please follow its `installation instructions`_ to do so.
 
-.. _Conda: https://docs.conda.io/en/latest/
+.. _Pixi: https://pixi.prefix.dev/latest/
+.. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-The ``SalishSeaNowcast`` and ``salishsea-site`` packages use some Python language features that are not available in versions prior to Python 3.6,
-in particular:
+Use :command:`pixi install -e fig-dev` command to download the package dependencies for the
+figure development and link them into the environment named ``fig-dev``.
 
-* `formatted string literals`_
-  (aka *f-strings*)
-* the `file system path protocol`_
+Most commands are executed using :command:`pixi run` in the :file:`SalishSeaNowcast/` directory
+(or a sub-directory).
 
-.. _Python: https://www.python.org/
-.. _formatted string literals: https://docs.python.org/3/reference/lexical_analysis.html#f-strings
-.. _file system path protocol: https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
+* The ``fig-dev`` environment has the packages installed that are required to run the
+  commands needed to develop and test figures.
+  For example,
+  to see the information about how to run the :py:mod:`~nowcast.workers.make_plots` worker,
+  use the command
+  :command:`pixi run -e fig-dev python -m nowcast.workers.make_plots --help`
 
-Figure development and web site operation both require access to the Salish Sea project :file:`/results/` directory tree.
-So,
-you should set up this environment on a Waterhole "fish" machine.
+* Other environments used for other :ref:`SalishSeaNowcastPackagedDevelopment` tasks have addition packages for running
+  the test suite,
+  building and link checking the documentation,
+  etc.
 
-The following instructions assume that you have `Miniconda`_ installed.
+* If you are using an integrated development environment like VSCode or PyCharm
+  where you need a Python interpreter to support coding assistance features,
+  run development tasks,
+  etc.,
+  use the interpreter in the ``fig-dev`` environment.
+  You can get its full path with :command:`pixi run -e fig-dev which python`
 
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+You can launch a sub-shell in the ``fig-dev`` environment with a command like :command:`pixi shell -e fig-dev`.
+That is convenient if you are running a lot of commands because it removed the need to type
+:command:`pixi run -e fig-dev` before each of them.
+Use :command:`exit` to leave the sub-shell.
 
-You will also need up-to-date clones of the following repositories from GitHub:
+:py:obj:`SalishSeaNowcast` figure development depends on a collection of other Python packages
+developed by the SalishSeaCast project and friends:
 
-* NEMO_Nowcast: https://github.com/43ravens/NEMO_Nowcast
-* moad_tools: https://github.com/UBC-MOAD/moad_tools
-* tools: https://github.com/SalishSeaCast/tools
-* NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
-* SalishSeaCmd: https://github.com/SalishSeaCast/SalishSeaCmd
-* SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
-* tidal-predictions: https://github.com/SalishSeaCast/tidal-predictions
-* salishsea-site: https://github.com/SalishSeaCast/salishsea-site
+* `NEMO_Nowcast`_
+* `moad_tools`_
+* `Reshapr`_
+* :ref:`SalishSeaToolsPackage`
+* `NEMO-Cmd`_
+* :ref:`SalishSeaCmdProcessor`
+* `salishsea-site`_
 
-Assuming that all of those repositories are cloned,
-one beside the other,
-in a directory like :file:`MEOPAR/`,
-and with the capitalization shown on the left above,
-you can create and activate a figures development environment with these commands:
+.. _NEMO_Nowcast: https://nemo-nowcast.readthedocs.io/en/latest/index.html
+.. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
+.. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
+.. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
+.. _salishsea-site: https://github.com/SalishSeaCast/salishsea-site
 
-.. code-block:: console
+Those packages are installed by the :command:`pixi install` command.
 
-    $ cd SalishSeaNowcast
-    $ conda env create -f envs/environment-fig-dev.yaml
-    $ conda activate nowcast-fig-dev
-    (nowcast-fig-dev)$ python -m pip install --editable ../NEMO_Nowcast
-    (nowcast-fig-dev)$ python -m pip install --editable ../moad_tools
-    (nowcast-fig-dev)$ python -m pip install --editable ../Reshapr
-    (nowcast-fig-dev)$ python -m pip install --editable ../tools/SalishSeaTools
-    (nowcast-fig-dev)$ python -m pip install --editable ../NEMO-Cmd
-    (nowcast-fig-dev)$ python -m pip install --editable ../SalishSeaCmd
-    (nowcast-fig-dev)$ python -m pip install --editable ../salishsea-site/
-    (nowcast-fig-dev)$ python -m pip install --editable .
+To get detailed information about the environments,
+the packages installed in them,
+`Pixi`_ tasks that are defined for them,
+etc.,
+use :command:`pixi info`.
 
-The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
+:py:obj:`SalishSeaNowcast` is installed in `editable install mode`_ in all of the environments that
+`Pixi`_ creates.
+That means that changes you make to the code are immediately reflected in the environments.
 
-To deactivate the environment use:
-
-.. code-block:: console
-
-    (nowcast-fig-dev)$ conda deactivate
+.. _editable install mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs

@@ -42,7 +42,7 @@ In summary:
 
   .. _salishsea.eos.ubc.ca Site Web App: https://salishsea-site.readthedocs.io/
 
-The :ref:`NowcastFiguresDevEnv` section below explains how to set up a conda environment that you can use to:
+The :ref:`NowcastFiguresDevEnv` section below provides details about the Pixi ``fign-dev`` environment that you can use to:
 
 * develop figure modules
 * test that the :py:mod:`nowcast.workers.make_plots` worker can render your figures to to the figures server
