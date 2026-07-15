@@ -124,8 +124,8 @@ Most commands are executed using :command:`pixi run` in the :file:`SalishSeaNowc
 (or a sub-directory).
 
 * The ``default`` environment has the packages installed that are required to run the
-  :py:obj:`Reshapr` command-line interface;
-  e.g. :command:`pixi run reshapr help`
+  modules that have a command-line interface;
+  e.g. :command:`pixi run python -m nowcast.workers.collect_weather --help`
 
 * Other environments used by commands in the sections below have addition packages for running
   the test suite,
