@@ -1,11 +1,11 @@
 # Python packages and versions used in most recently in development environment
 #
-# This list is intended to be for reference only.
-# Use the conda environment description file (environment-dev.yaml)
-# to create an isolated development environment.
+# This file is retained so that we will continue to get security update notifications
+# and PRs from dependabot. It will be dropped when dependabot adds support for
+# the `pixi.lock` file.
 #
-# Create/update this file with:
-#   (salishsea-nowcast)$ python -m pip list --format=freeze >> envs/requirements.txt
+# Update this file with:
+#   pixi run -e dev update-reqs
 
 alabaster==1.0.0
 angles==2.0
