@@ -360,10 +360,12 @@ and export environment variables to enable wwatch3 to use netCDF4:
     export WWATCH3_NETCDF=NC4
     export NETCDF_CONFIG=$(which nc-config)
 
-Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
+Create :file:`$HOME/.bash_aliases` containing commands to include full time stamps in
+:command:`ls` and to make :command:`rm` default to prompting for confirmation:
 
 .. code-block:: console
 
+    alias lf="ls -ltr --full-time"
     alias rm="rm -i"
 
 
@@ -626,11 +628,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ git clone git@github.com:SalishSeaCast/grid.git
-    $ git clone git@github.com:UBC-MOAD/moad_tools.git
-    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
-    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
-    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaWaves.git
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
@@ -748,69 +746,42 @@ Build the suite of wwatch3 programs with:
 Python Packages
 ===============
 
-Install the `Miniforge-pypy3`_ environment and package manager:
+Install the `Pixi`_ environment and package manager:
 
-.. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
-
-
-.. code-block:: console
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ curl -LO https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge-pypy3-Linux-x86_64.sh
-    $ bash Miniforge-pypy3-Linux-x86_64.sh
-
-Answer :file:`/nemoShare/MEOPAR/nowcast-sys/miniforge-pypy3` when the installer asks for an installation location.
-
-Answer ``yes`` when the install asks :guilabel:`Do you wish to update your shell profile to automatically initialize conda? ... [yes|no]`.
-
-The Python packages that the system depends on are installed in a conda environment with:
+.. _Pixi: https://pixi.prefix.dev/latest/
 
 .. code-block:: console
 
-    $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ mamba env create \
-        --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
-        -f SalishSeaNowcast/envs/environment-prod.yaml
-    $ mamba activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable moad_tools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
+    $ curl -fsSL https://pixi.sh/install.sh | sh
+
+Add lines to :file:`~/.bash_aliases` to add Pixi to :envvar:`PATH` and to enable autocompletion
+for Pixi:
+
+.. code-block:: console
+
+   # Add Pixi to PATH
+   export PATH="/home/ubuntu/.pixi/bin:$PATH"
+   # Enable autocompletion for Pixi
+   eval "$(pixi completion --shell bash)"
+
+Delete the ``export PATH="/home/ubuntu/.pixi/bin:$PATH"`` line that the Pixi installer added
+to :file:`~/.bashrc`.
+
+Start a new shell to apply the changes.
+
+The Python packages that the system depends on are installed in ``default`` environment with:
+
+.. code-block:: console
+
+    $ pixi install
 
 
 Environment Variables
 =====================
 
-Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
-
-.. code-block:: console
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/nowcast-env
-    $ mkdir -p etc/conda/activate.d
-    $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export NOWCAST_ENV=/nemoShare/MEOPAR/nowcast-sys/nowcast-env
-    export NOWCAST_CONFIG=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config
-    export NOWCAST_YAML=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
-    export NOWCAST_LOGS=/nemoShare/MEOPAR/nowcast-sys/logs/nowcast
-    export NUMEXPR_MAX_THREADS=8
-    export SENTRY_DSN=a_valid_sentry_dsn_url
-    EOF
-
-and :command:`unset` them when it is deactivated.
-
-.. code-block:: console
-
-    $ mkdir -p etc/conda/deactivate.d
-    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
-    unset NOWCAST_ENV
-    unset NOWCAST_CONFIG
-    unset NOWCAST_YAML
-    unset NOWCAST_LOGS
-    unset NUMEXPR_MAX_THREADS
-    unset SENTRY_DSN
-    EOF
+Copy the :file:`/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.env-arbutus` file as
+:file:`/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.env` and edit it to add a valid Sentry DSN URL
+as the value in the ``export SENTRY_DSN=...` line.
 
 
 .. _ArbutusCloudNEMORunsDirectory:
