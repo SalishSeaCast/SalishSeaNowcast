@@ -31,51 +31,41 @@ Clone the following repos into :file:`/SalishSeaCast/`:
 
     $ cd /SalishSeaCast/
     $ git clone git@github.com:SalishSeaCast/grid.git
-    $ git clone git@github.com:UBC-MOAD/moad_tools.git
-    $ git clone git@github.com:UBC-MOAD/Reshapr.git
-    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
-    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
-    $ git clone git@github.com:SalishSeaCast/private-tools.git
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
-    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@github.com:SalishSeaCast/salishsea-site.git
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
     $ git clone git@github.com:SalishSeaCast/tidal-predictions.git
     $ git clone git@github.com:SalishSeaCast/tides.git
-    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
 
 
 Python Packages
 ===============
 
-The Python packages that the system depends on are installed in conda environments.
+Install the `Pixi`_ environment and package manager:
 
-.. note::
-   In Mar-2022 the Python environment and package management tool used for the system
-   was changed from Miniconda3 to Mambaforge-pypy3.
-   In Oct-2024 it was changed again to `Miniforge-pypy3`_ to reflect the merge of
-   Mambaforge into Miniforge and the deprecation of mambaforge in Jul-2024.
-
-   .. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
-
-For the ``SalishSeaCast`` automation system:
+.. _Pixi: https://pixi.prefix.dev/latest/
 
 .. code-block:: console
 
-    $ cd /SalishSeaCast/
-    $ mamba env create \
-        --prefix /SalishSeaCast/nowcast-env \
-        -f SalishSeaNowcast/envs/environment-prod.yaml
-    $ mamba activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable moad_tools/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable Reshapr/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
-    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
+    $ curl -fsSL https://pixi.sh/install.sh | sh
+
+Add lines to :file:`~/.bashrc` to enable autocompletion for Pixi:
+
+.. code-block:: console
+
+   # Enable autocompletion for Pixi
+   eval "$(pixi completion --shell bash)"
+
+Start a new shell to apply the changes.
+
+The Python packages that the system depends on are installed in ``default`` environment with:
+
+.. code-block:: console
+
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ pixi install
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and
 rivers hydrometric files from the `ECCC MSC datamart service`_:
@@ -85,12 +75,9 @@ rivers hydrometric files from the `ECCC MSC datamart service`_:
 
 .. code-block:: console
 
-    $ cd /SalishSeaCast/
-    $ mamba env create \
-        --prefix /SalishSeaCast/sarracenia-env \
-        -f SalishSeaNowcast/envs/environment-sarracenia.yaml
-    $ mamba activate /SalishSeaCast/sarracenia-env
-    (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ pixi install -e sarracenia
+    $ pixi run -e sarracenia sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
 
@@ -98,112 +85,44 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 
 .. code-block:: console
 
-    $ cd /SalishSeaCast
-    $ mamba env create \
-        --prefix /SalishSeaCast/salishsea-site-env \
-        -f salishsea-site/envs/environment-prod.yaml
-    $ mamba activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ python -m pip install --editable salishsea-site/
+    $ cd /SalishSeaCast/salishsea-site
+    $ pixi install
 
 
 Environment Variables
 =====================
 
-:file:`/SalishSeaCast/nowcast-env`
-----------------------------------
+:file:`/SalishSeaCast/SalishSeaNowcast/.env-skookum`
+----------------------------------------------------
 
-Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to
-automatically :command:`export` the environment variables required by the nowcast system
-when the environment is activated:
+Copy the :file:`/SalishSeaCast/SalishSeaNowcast/.env-skookum` file as
+:file:`/SalishSeaCast/SalishSeaNowcast/.env` and edit it to add:
 
-.. code-block:: console
-
-    $ cd /SalishSeaCast/nowcast-env
-    $ mkdir -p etc/conda/activate.d
-    $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export NOWCAST_ENV=/SalishSeaCast/nowcast-env
-    export NOWCAST_CONFIG=/SalishSeaCast/SalishSeaNowcast/config
-    export NOWCAST_YAML=/SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
-    export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
-    export NUMEXPR_MAX_THREADS=6
-    export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token
-    export SARRACENIA_ENV=/SalishSeaCast/sarracenia-env
-    export SARRACENIA_CONFIG=/SalishSeaCast/SalishSeaNowcast/sarracenia
-    export SENTRY_DSN=a_valid_sentry_dsn_url
-    export SLACK_SSC_DAILY_PROGRESS=a_valid_slack_incoming_webhook_url
-    export SLACK_SSC_HINDCAST_PROGRESS=a_valid_slack_incoming_webhook_url
-    EOF
-
-and :command:`unset` them when it is deactivated.
-
-.. code-block:: console
-
-    $ mkdir -p etc/conda/deactivate.d
-    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
-    unset NOWCAST_ENV
-    unset NOWCAST_CONFIG
-    unset NOWCAST_YAML
-    unset NOWCAST_LOGS
-    unset NUMEXPR_MAX_THREADS
-    unset ONC_USER_TOKEN
-    unset SARRACENIA_ENV
-    unset SARRACENIA_CONFIG
-    unset SENTRY_DSN
-    unset SLACK_SSC_DAILY_PROGRESS
-    unset SLACK_SSC_HINDCAST_PROGRESS
-    EOF
+* a valid ONC data API user token as the value in the ``export ONC_USER_TOKEN=...`` line
+* a valid Sentry DSN URL as the value in the ``export SENTRY_DSN=...`` line
+* a valid Slack incoming webhook URL as the value in the ``export SLACK_SSC_DAILY_PROGRESS=...`` line
+* a valid Slack incoming webhook URL as the value in the ``export SLACK_SSC_HINDCAST_PROGRESS=...`` line
 
 
 :file:`/SalishSeaCast/sarracenia-env`
 -------------------------------------
 
-The :file:`/SalishSeaCast/sarracenia-env` environment variables are included in the
-:file:`SalishSeaNowcast/envs/environment-sarracenia.yaml` file so that they are managed by
-:command:`mamba` to automatically :command:`export` the environment variables required by the
-sarracenia client when the environment is activated and :command:`unset` them when the
-environment is deactivated.
-To see the variables and their values:
-
-.. code-block:: console
-
-    $ cd /SalishSeaCast/sarracenia-env
-    $ source activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ mamba env config vars list
+The environment variables for the ``sarracenia`` environment are included in the
+``[tool.pixi.feature.sarracenia.activation.env]`` table in the
+:file:`SalishSeaNowcast/pyproject.toml` file so that they are managed by Pixi to automatically
+:command:`export` the environment variables required by the ``sarracenia`` client when the
+a :command:`pixi run -e sarracenia ...` command is used,
+or a :command:`pixi shell -e sarracenia` sub-shell is started.
 
 
-:file:`/SalishSeaCast/salishsea-site-env`
------------------------------------------
+:file:`/SalishSeaCast/salishsea-site/.env-template`
+---------------------------------------------------
 
-Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environment to
-automatically :command:`export` the environment variables required by the
-https://salishsea.eos.ubc.ca website app when the environment is activated:
+Copy the :file:`/SalishSeaCast/salishsea-site/.env-template` file as
+:file:`/SalishSeaCast/salishsea-site/.env` and edit it to add:
 
-.. code-block:: console
-
-    $ cd /SalishSeaCast/salishsea-site-env
-    $ mkdir -p etc/conda/activate.d
-    $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export SALISHSEA_SITE_ENV=/SalishSeaCast/salishsea-site-env
-    export SALISHSEA_SITE=/SalishSeaCast/salishsea-site
-    export SALISHSEA_SITE_LOGS=/SalishSeaCast/logs/salishsea-site
-    export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
-    export NOWCAST_DEBUG_LOG_TOKEN=the_token_for_the_debug_log_page
-    export SENTRY_DSN=a_valid_sentry_dsn_url
-    EOF
-
-and :command:`unset` them when it is deactivated.
-
-.. code-block:: console
-
-    $ mkdir -p etc/conda/deactivate.d
-    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
-    unset SALISHSEA_SITE_ENV
-    unset SALISHSEA_SITE
-    unset SALISHSEA_SITE_LOGS
-    unset NOWCAST_LOGS
-    unset NOWCAST_DEBUG_LOG_TOKEN
-    unset SENTRY_DSN
-    EOF
+* the token for the debug log page as the value in the ``export NOWCAST_DEBUG_LOG_TOKEN=...`` line
+* a valid Sentry DSN URL as the value in the ``export SENTRY_DSN=...`` line
 
 
 Nowcast Runs Directories
@@ -345,20 +264,18 @@ Create a :program:`tmux` session on ``salish`` for the dask cluster:
     $ tmux new -s make_averaged_dataset
 
 In the first :program:`tmux` terminal,
-activate the :file:`/SalishSeaCast/nowcast-env` environment,
-and launch the :command:`dask-scheduler` with its serving port on 4386,
+launch the :command:`dask-scheduler` with its serving port on 4386,
 and its dashboard port on 4387:
 
 .. code-block:: console
 
-    $ mamba activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ pixi run dask scheduler --port 4386 --dashboard-address :4387
 
 Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
 
 Start a second :program:`tmux` terminal with :kbd:`Control-b c`,
-activate the :file:`/SalishSeaCast/nowcast-env` environment,
-and launch the 4 :command:`dask worker` processes with these properties:
+launch the 4 :command:`dask worker` processes with these properties:
 
 * 1 thread per worker
 * 64G memory limit per worker
@@ -368,11 +285,11 @@ and launch the 4 :command:`dask worker` processes with these properties:
 
 .. code-block:: console
 
-    $ mamba activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
-      --local-directory /tmp/SalishSeaCast \
-      --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
-      localhost:4386
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ pixi run dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
+        --local-directory /tmp/SalishSeaCast \
+        --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
+        localhost:4386
 
 Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
 
