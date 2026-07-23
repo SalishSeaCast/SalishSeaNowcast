@@ -781,7 +781,7 @@ Environment Variables
 
 Copy the :file:`/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.env-arbutus` file as
 :file:`/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.env` and edit it to add a valid Sentry DSN URL
-as the value in the ``export SENTRY_DSN=...` line.
+as the value in the ``export SENTRY_DSN=...`` line.
 
 
 .. _ArbutusCloudNEMORunsDirectory:
