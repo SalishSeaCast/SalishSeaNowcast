@@ -264,7 +264,7 @@ jsonpickle = ">=4.1.2,<5"
 netifaces = ">=0.11.0,<0.12"
 psutil = ">=7.2.2,<8"
 paramiko = ">=5.0.0,<6"
-python = "3.14.*"
+python = "3.11.0.*"
 watchdog = ">=6.0.0,<7"
 
 [tool.pixi.feature.sarracenia.activation.env]
@@ -275,4 +275,4 @@ SARRACENIA_CONFIG="/SalishSeaCast/SalishSeaNowcast/sarracenia"
 dev = ["sphinx-rtd-theme==3.1.0"]
 docs = ["sphinx-rtd-theme==3.1.0"]
 fig-dev = ["salishsea_site @ git+https://github.com/SalishSeaCast/salishsea-site.git"]
-sarracenia = ["metpx-sarracenia>=2.24.8.post2,<3"]
+sarracenia = ["metpx-sarracenia==2.22.10.post2"]
