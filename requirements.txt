@@ -172,7 +172,7 @@ scipy==1.18.0
 scour==0.38.2
 SecretStorage==3.5.0
 sentry-sdk==2.64.0
-setuptools==82.0.1
+setuptools==83.0.0
 shapely==2.1.2
 shellingham==1.5.4
 shiboken6==6.11.1
