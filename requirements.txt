@@ -124,7 +124,7 @@ partd==1.4.2
 pathspec==1.1.1
 pbr==7.0.3
 pexpect==4.9.0
-pillow==12.2.0
+pillow==12.3.0
 pip==26.1.2
 platformdirs==4.10.0
 pluggy==1.6.0
