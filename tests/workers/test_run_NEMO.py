@@ -85,7 +85,7 @@ def config(base_config):
                       xios host: 192.168.238.14
                       run prep dir: nowcast-sys/runs/
                       grid dir: nowcast-sys/grid/
-                      salishsea_cmd: bin/salishsea
+                      salishsea_cmd: pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
                       job exec cmd: bash
                       run types:
                         nowcast:
@@ -1041,8 +1041,8 @@ class TestBuildScript:
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}"
         MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
-        COMBINE="bin/salishsea combine"
-        GATHER="bin/salishsea gather"
+        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
 
         mkdir -p ${{RESULTS_DIR}}
 
@@ -1107,8 +1107,8 @@ class TestDefinitions:
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
         MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
-        COMBINE="bin/salishsea combine"
-        GATHER="bin/salishsea gather"
+        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
         defns = defns.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
@@ -1137,8 +1137,8 @@ class TestDefinitions:
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
         MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
-        COMBINE="bin/salishsea combine"
-        GATHER="bin/salishsea gather"
+        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
         defns = defns.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):

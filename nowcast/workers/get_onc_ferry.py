@@ -409,7 +409,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         else:
             try:
                 data_array = array.resample(time="1Min").mean()
-            except (IndexError, ValueError):
+            except IndexError, ValueError:
                 # array is empty, meaning there are no observations with
                 # qaqcFlag<=1 or qaqcFlac>=7, so substitute a DataArray full of NaNs
                 logger.warning(

@@ -23,50 +23,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.13' ]
-    runs-on: 'ubuntu-latest'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7  # zizmor: ignore[unpinned-uses]
-        with:
-          persist-credentials: false  # Required to avoid exposing secrets to pytest run in forked PRs
+        # Need to specify the environment in a matrix because that's what the reusable
+        # workflow expects
+        environment: [ 'test-py314' ]
 
-      - name: Get current date for downloads cache key
-        id: date
-        run: echo "date=$(date +%Y-%m-%d)" >> "${GITHUB_OUTPUT}"
-
-      - name: Set up Conda environment with Micromamba
-        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476
-        with:
-           environment-file: envs/environment-test.yaml
-           environment-name: salishsea-nowcast-test
-           # environment caching does not play nicely with --editable installed packages
-           cache-environment: false
-           cache-downloads: true
-           # persist downloads cache for 1 day
-           cache-downloads-key: downloads-${{ steps.date.outputs.date }}-pytest
-           create-args: >-
-             python=${{ matrix.python-version }}
-
-      - name: Install editable-mode dependency packages
-        shell: bash -l {0}
-        run: |
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
-          python -m pip install --editable $GITHUB_WORKSPACE
-
-      - name: pytest package with coverage
-        shell: bash -l {0}
-        run: |
-          pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
-
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          token: ${{ secrets.CODECOV_TOKEN }}  # zizmor: ignore[secrets-outside-env]
+    uses: UBC-MOAD/gha-workflows/.github/workflows/pixi-pytest-with-coverage.yaml@main  # zizmor: ignore[unpinned-uses]
+    with:
+      environment: ${{ matrix.environment }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

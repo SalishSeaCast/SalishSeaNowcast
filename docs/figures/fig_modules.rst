@@ -44,7 +44,6 @@ The :file:`research/` directory is generally where new figure modules for NEMO r
 In Python terms,
 those directories are namespaces from which figure modules can be imported:
 
-* :py:obj:`nowcast.figures.fvcom`
 * :py:obj:`nowcast.figures.comparison`
 * :py:obj:`nowcast.figures.publish`
 * :py:obj:`nowcast.figures.research`

@@ -609,11 +609,11 @@ run:
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
-      envvars: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
+      envvars: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.env
       # Python interpreter on compute host in an environment with all
       # dependencies installed. Used to, for example, launch run_NEMO and
       # watch_NEMO workers.
-      python: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/python
+      python: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/.pixi/envs/default/bin/python
       # Location on the compute host of the nowcast system config file
       config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       # Directory on compute host where files (e.g. namelist.time) and symlinks
@@ -624,7 +624,7 @@ run:
       grid dir: /nemoShare/MEOPAR/nowcast-sys/grid/
       # Path to the salishsea command processor executable to use in the run
       # script
-      salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
+      salishsea_cmd: pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
       # Executable to use to submit the SalishSeaNEMO.sh script to be run
       job exec cmd: bash
       # Run type specific configurations for the runs that are executed on the

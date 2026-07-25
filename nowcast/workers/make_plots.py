@@ -765,7 +765,7 @@ def _render_figures(
         logger.debug(f"starting {fig_func.__module__}.{fig_func.__name__}")
         try:
             fig = _calc_figure(fig_func, args, kwargs)
-        except (FileNotFoundError, IndexError, KeyError, TypeError):
+        except FileNotFoundError, IndexError, KeyError, TypeError:
             # **IMPORTANT**: the collection of exceptions above must match those
             # handled in the _calc_figure() function
             continue

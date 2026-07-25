@@ -602,7 +602,7 @@ def after_upload_forcing(msg, config, checklist):
     try:
         host_name = list(msg.payload.keys())[0]
         host_config = config["run"]["enabled hosts"][host_name]
-    except (AttributeError, IndexError):
+    except AttributeError, IndexError:
         # Malformed payload - no host name in payload;
         # upload_forcing worker probably crashed
         return []
