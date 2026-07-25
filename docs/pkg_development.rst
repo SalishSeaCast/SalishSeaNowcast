@@ -702,24 +702,34 @@ completed.
 
 The release process steps are:
 
-#. Use :command:`hatch version release` to bump the version from ``.devn`` to the next release
-   version identifier
+#. Use :command:`pixi run -e dev hatch version release` to bump the version from ``.devn`` to the next release
+   version identifier;
+   e.g. ``26.1.dev0`` to ``26.1``
+
+#. Use :command:`pixi update` to update the lock file to reflect the new version identifier
 
 #. Commit the version bump
 
 #. Create an annotated tag for the release with :guilabel:`Git -> New Tag...` in PyCharm
-   or :command:`git tag -e -a vyy.n`
+   or :command:`git tag -e -a vyy.n`;
+   e.g. :command:`git tag -e -a v26.1`
 
 #. Push the version bump commit and tag to GitHub
 
 #. Use the GitHub web interface to create a release,
    editing the auto-generated release notes into sections:
 
-   * Features
-   * Bug Fixes
-   * Documentation
-   * Maintenance
-   * Dependency Updates
+  .. code-block:: markdown
+
+       ### Features
+
+       ### Bug Fixes
+
+       ### Documentation
+
+       ### Maintenance
+
+       ### Dependency Updates
 
 #. Use the GitHub :guilabel:`Issues -> Milestones` web interface to edit the release
    milestone:
@@ -732,10 +742,10 @@ The release process steps are:
 
    * Set the :guilabel:`Title` to the next release version,
      prepended with a ``v``;
-     e.g. ``v23.1``
+     e.g. ``v26.2``
    * Set the :guilabel:`Due date` to the end of the year of the next release
    * Set the :guilabel:`Description` to something like
-     ``v23.1 release - when it's ready :-)``
+     ``v26.2 release - when it's ready :-)``
    * Create the next release milestone
 
 #. Review the open issues,
@@ -744,8 +754,10 @@ The release process steps are:
 
 #. Close the milestone for the just released version.
 
-#. Use :command:`hatch version minor,dev` to bump the version for the next development cycle,
-   or use :command:`hatch version major,minor,dev` for a year rollover version bump
+#. Use :command:`pixi run -e dev hatch version minor,dev` to bump the version for the next development cycle,
+   or use :command:`pixi run -e dev hatch version major,minor,dev` for a year rollover version bump
+
+#. Use :command:`pixi update` to update the lock file to reflect the new version identifier
 
 #. Commit the version bump
 
