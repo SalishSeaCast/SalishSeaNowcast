@@ -39,7 +39,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    # see envs/environment-prod.yaml for conda environment production installation
     # see requirements.txt for package versions used during recent development
     "angles>=2.0,<3",
     "arrow",
