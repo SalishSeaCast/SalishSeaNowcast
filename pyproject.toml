@@ -129,7 +129,13 @@ platforms = ["linux-64", "osx-64"]
 [tool.pixi.pypi-dependencies]
 SalishSeaNowcast = { path = ".", editable = true }
 
-[tool.pixi.tasks]
+[tool.pixi.tasks.worker]
+# Run an arbitrary worker
+# Provide the worker args after --
+# e.g. `pixi run worker upload_forcing -- arbutus.cloud-nowcast turbidity --run-date 2026-07-26 --debug`
+args = ["worker"]
+cmd = "python -m nowcast.workers.{{ worker }} $NOWCAST_YAML"
+description = "Run a SalishSeaNowcast worker. Put args after the worker name, e.g. `pixi run worker upload_forcing -- ...`"
 
 [tool.pixi.dependencies]
 arrow = ">=1.4.0,<2"
