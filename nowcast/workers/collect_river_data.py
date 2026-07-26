@@ -106,13 +106,18 @@ def collect_river_data(parsed_args, config, *args):
         "ECCC": _calc_eccc_day_avg_discharge,
         "USGS": _get_usgs_day_avg_discharge,
     }
-    day_avg_discharge = day_avg_discharge_funcs[data_src](river_name, data_date, config)
     daily_avg_file = Path(config["rivers"]["SOG river files"][river_name])
-    _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
     checklist = {
         river_name: os.fspath(daily_avg_file),
         "data date": data_date.format("YYYY-MM-DD"),
     }
+    day_avg_discharge = day_avg_discharge_funcs[data_src](river_name, data_date, config)
+    if pandas.isna(day_avg_discharge):
+        logger.warning(
+            f"Missing obs for {data_src} {river_name} river average discharge for 2018-12-26"
+        )
+        return checklist
+    _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
     logger.info(
         f"Appended {data_src} {river_name} river average discharge for "
         f"{data_date.format('YYYY-MM-DD')} to: {daily_avg_file}"
