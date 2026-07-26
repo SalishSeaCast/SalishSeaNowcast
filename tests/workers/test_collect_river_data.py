@@ -262,6 +262,64 @@ class TestCollectRiverData:
             _mock_get_usgs_day_avg_discharge,
         )
 
+    @staticmethod
+    @pytest.fixture
+    def mock_missing_eccc_day_avg_discharge(monkeypatch):
+        def _mock_missing_eccc_day_avg_discharge(river_name, data_date, config):
+            return numpy.nan
+
+        monkeypatch.setattr(
+            collect_river_data,
+            "_calc_eccc_day_avg_discharge",
+            _mock_missing_eccc_day_avg_discharge,
+        )
+
+    @staticmethod
+    @pytest.fixture
+    def mock_missing_usgs_day_avg_discharge(monkeypatch):
+        def _mock_missing_usgs_day_avg_discharge(river_name, data_date, config):
+            return numpy.nan
+
+        monkeypatch.setattr(
+            collect_river_data,
+            "_get_usgs_day_avg_discharge",
+            _mock_missing_usgs_day_avg_discharge,
+        )
+
+    def test_missing_discharge(
+        self,
+        mock_missing_eccc_day_avg_discharge,
+        mock_missing_usgs_day_avg_discharge,
+        data_src,
+        river_name,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        sog_river_file = config["rivers"]["SOG river files"][river_name]
+        monkeypatch.setitem(
+            config["rivers"]["SOG river files"], river_name, tmp_path / sog_river_file
+        )
+        parsed_args = SimpleNamespace(
+            data_src=data_src, river_name=river_name, data_date=arrow.get("2026-07-24")
+        )
+        caplog.set_level(logging.DEBUG)
+
+        checklist = collect_river_data.collect_river_data(parsed_args, config)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"Collecting {data_src} {river_name} river data for 2026-07-24"
+        assert caplog.messages[0] == expected
+        assert caplog.records[1].levelname == "WARNING"
+        expected = f"Missing obs for {data_src} {river_name} river average discharge for 2018-12-26"
+        assert caplog.messages[1] == expected
+        expected = {
+            river_name: os.fspath(tmp_path / sog_river_file),
+            "data date": "2026-07-24",
+        }
+        assert checklist == expected
+
     def test_checklist(
         self,
         mock_calc_eccc_day_avg_discharge,
