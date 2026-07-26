@@ -19,3 +19,4 @@ repos:
     rev: 26.5.1
     hooks:
       - id: black
+        arg: --target-version=py314
