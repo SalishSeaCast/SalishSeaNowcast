@@ -1010,8 +1010,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/nc-time-axis-1.4.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nodeenv-1.10.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-indexed-0.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-typing-compat-20260602.2.5-pyhb860519_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy_groupies-0.11.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-0.18.0-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-numpy-0.18.0-pyh5504437_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-26.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pandas-stubs-2.3.3.260113-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
@@ -1051,6 +1055,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-argparse-1.8.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/roman-numerals-4.1.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scipy-stubs-1.18.0.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.66.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-83.0.0-pyh332efcf_0.conda
@@ -1084,6 +1089,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tqdm-4.69.1-pyh8f84b5b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2026.6.1.19-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/truststore-0.10.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2026.3.1.20260727-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.16.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
@@ -1203,8 +1209,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/nc-time-axis-1.4.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nodeenv-1.10.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-indexed-0.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-typing-compat-20260602.2.5-pyhb860519_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy_groupies-0.11.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-0.18.0-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-numpy-0.18.0-pyh5504437_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-26.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pandas-stubs-2.3.3.260113-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
@@ -1244,6 +1254,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-argparse-1.8.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/roman-numerals-4.1.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scipy-stubs-1.18.0.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.66.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-83.0.0-pyh332efcf_0.conda
@@ -1277,6 +1288,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tqdm-4.69.1-pyh8f84b5b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2026.6.1.19-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/truststore-0.10.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2026.3.1.20260727-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.16.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
@@ -2556,9 +2568,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/nodeenv-1.10.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/notebook-shim-0.2.4-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-indexed-0.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-typing-compat-20260602.2.5-pyhb860519_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy_groupies-0.11.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-0.18.0-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-numpy-0.18.0-pyh5504437_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/overrides-7.7.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-26.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pandas-stubs-2.3.3.260113-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.5.0-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/parso-0.8.7-pyhcf101f3_0.conda
@@ -2615,6 +2631,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-argparse-1.8.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/roman-numerals-4.1.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scipy-stubs-1.18.0.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyha191276_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.66.1-pyhd8ed1ab_0.conda
@@ -2654,6 +2671,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/translationstring-1.4-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2026.6.1.19-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/truststore-0.10.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2026.3.1.20260727-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.16.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_utils-0.1.0-pyhd8ed1ab_1.conda
@@ -2824,9 +2842,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/nodeenv-1.10.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/notebook-shim-0.2.4-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-indexed-0.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/numpy-typing-compat-20260602.2.5-pyhb860519_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/numpy_groupies-0.11.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-0.18.0-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/optype-numpy-0.18.0-pyh5504437_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/overrides-7.7.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-26.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pandas-stubs-2.3.3.260113-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.5.0-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/parso-0.8.7-pyhcf101f3_0.conda
@@ -2883,6 +2905,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-argparse-1.8.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/roman-numerals-4.1.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scipy-stubs-1.18.0.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyh5552912_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.66.1-pyhd8ed1ab_0.conda
@@ -2922,6 +2945,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/translationstring-1.4-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2026.6.1.19-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/truststore-0.10.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2026.3.1.20260727-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.16.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_utils-0.1.0-pyhd8ed1ab_1.conda
@@ -11073,6 +11097,20 @@ packages:
   run_exports: {}
   size: 22223
   timestamp: 1683644840783
+- conda: https://conda.anaconda.org/conda-forge/noarch/numpy-typing-compat-20260602.2.5-pyhb860519_1.conda
+  sha256: 510cf01dd2b3934078f8fda5360a645649e0652a4edd94fcaace58e0d53bde56
+  md5: f337e1f9bbae5c509a95f77dc3a47a14
+  depends:
+  - python >=3.12
+  - numpy <2.6,>=2.5
+  - python
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/numpy-typing-compat?source=hash-mapping
+  run_exports: {}
+  size: 13203
+  timestamp: 1782221065995
 - conda: https://conda.anaconda.org/conda-forge/noarch/numpy_groupies-0.11.3-pyhd8ed1ab_0.conda
   sha256: 94c148b8d4687c839a37c4a68b1674fa548b065e833b9b4701865d548995239f
   md5: 5402c2b046432ceb2d192a82802e7854
@@ -11086,6 +11124,35 @@ packages:
   run_exports: {}
   size: 38384
   timestamp: 1747937493897
+- conda: https://conda.anaconda.org/conda-forge/noarch/optype-0.18.0-pyhc364b38_0.conda
+  sha256: d88ea70bdbe44ea7e06d5305c363b4624609ed2712f2742e6fb25f05c536fdc0
+  md5: c3b24fd5393b5c674dd9607424201e18
+  depends:
+  - python >=3.12
+  - typing-extensions >=4.10
+  - python
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/optype?source=hash-mapping
+  run_exports: {}
+  size: 64931
+  timestamp: 1780922251176
+- conda: https://conda.anaconda.org/conda-forge/noarch/optype-numpy-0.18.0-pyh5504437_0.conda
+  sha256: aa5238f44c1563606f0a448b480e67793422a125321f2039bd519915c21d547d
+  md5: 1871ee7210705711aec48e32842b3ca8
+  depends:
+  - python >=3.12
+  - numpy >=2.0,<2.8
+  - numpy-typing-compat >=20260602.2.0,<20260603.2.0
+  - optype ==0.18.0 pyhc364b38_0
+  - python
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  run_exports: {}
+  size: 10913
+  timestamp: 1780922251176
 - conda: https://conda.anaconda.org/conda-forge/noarch/overrides-7.7.0-pyhd8ed1ab_1.conda
   sha256: 1840bd90d25d4930d60f57b4f38d4e0ae3f5b8db2819638709c36098c6ba770c
   md5: e51f1e4089cad105b6cac64bd8166587
@@ -11112,6 +11179,20 @@ packages:
   run_exports: {}
   size: 91574
   timestamp: 1777103621679
+- conda: https://conda.anaconda.org/conda-forge/noarch/pandas-stubs-2.3.3.260113-pyhd8ed1ab_0.conda
+  sha256: 01ca8d406c5959ee84d4c467025005e0825c46f4e1098112309875c6d67c657d
+  md5: 7fd6f0c1f9fe715a5ee192f727e74528
+  depends:
+  - numpy >=1.26.0
+  - python >=3.10
+  - types-pytz >=2022.1.1
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/pandas-stubs?source=hash-mapping
+  run_exports: {}
+  size: 106767
+  timestamp: 1768403429992
 - conda: https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.5.0-pyhd8ed1ab_0.tar.bz2
   sha256: 2bb9ba9857f4774b85900c2562f7e711d08dd48e2add9bee4e1612fbee27e16f
   md5: 457c2c8c08e54905d6954e79cb5b5db9
@@ -11923,6 +12004,22 @@ packages:
   run_exports: {}
   size: 17298
   timestamp: 1735043793005
+- conda: https://conda.anaconda.org/conda-forge/noarch/scipy-stubs-1.18.0.1-pyhc364b38_0.conda
+  sha256: 5fcdd4d08f120fa991dd0057b16cc8e33eedb29e19f7c29752feb33d76567c8a
+  md5: 762dcb2958a9b7cda6e38d0c04378715
+  depends:
+  - python >=3.12
+  - optype-numpy >=0.15.0,<0.20.0
+  - python
+  constrains:
+  - scipy >=1.18.0,<1.19.0
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/scipy-stubs?source=hash-mapping
+  run_exports: {}
+  size: 381529
+  timestamp: 1783898380185
 - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
   sha256: 5cd0b7517efc110eb85eac1230347bc4ba991cd2ee741aa18ddc8280b9e5c12e
   md5: bd059a2f4d507928112eb2c2c3b484d2
@@ -12474,6 +12571,18 @@ packages:
   run_exports: {}
   size: 24279
   timestamp: 1766494826559
+- conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2026.3.1.20260727-pyhcf101f3_0.conda
+  sha256: 8174977249085904a62a0e00f29faceed6d81ba7bef33ceb5ff8b0c5896f1e58
+  md5: b27fc3df415ba0196e462700ef487e5e
+  depends:
+  - python >=3.10
+  - python
+  license: Apache-2.0 AND MIT
+  purls:
+  - pkg:pypi/types-pytz?source=compressed-mapping
+  run_exports: {}
+  size: 20618
+  timestamp: 1785136222524
 - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.16.0-h69aa097_0.conda
   sha256: b141933ece3518f6d7b75dfb59451e2f26b405a44c18e2518a83e9a02e09315c
   md5: c680b5747e8c4c8f23dca0bb7042a8fc
