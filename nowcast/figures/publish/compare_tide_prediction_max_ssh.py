@@ -225,7 +225,7 @@ def _prep_plot_data(
     tracers_ds = xarray.open_dataset(grid_T_hr_path)
     max_ssh_time_utc = (
         arrow.get(str(max_ssh.time.values))
-        .replace(tzinfo=ssh_forecast.attrs["tz_name"])
+        .replace(tzinfo=ssh_forecast.attrs["utc_offset"])
         .to("utc")
     )
     return SimpleNamespace(
@@ -520,9 +520,10 @@ def _plot_ssh_map(ax_map, plot_data, place, theme):
 def _ssh_map_axis_labels(ax_map, place, plot_data, theme):
     max_ssh_time = arrow.get(str(plot_data.max_ssh_field.time_counter.values))
     tz_name = plot_data.ssh_forecast.attrs["tz_name"]
+    utc_offset = plot_data.ssh_forecast.attrs["utc_offset"]
     ax_map.set_title(
         f"Sea Surface Height at "
-        f'{max_ssh_time.to(tz_name).format("YYYY-MM-DD HH:mm")} {tz_name}',
+        f'{max_ssh_time.to(utc_offset).format("YYYY-MM-DD HH:mm")} {tz_name}',
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )

@@ -382,10 +382,11 @@ def localize_time(data_array, time_coord="time", local_datetime=None):
     time_values = getattr(data_array, time_coord).values
     if local_datetime is None:
         local_datetime = arrow.get(str(time_values[0])).to("local")
-    tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
-    tz_name = local_datetime.tzinfo.tzname(local_datetime.datetime)
+    tz_offset = local_datetime.datetime.utcoffset()
+    tz_name = local_datetime.datetime.tzname()
     numpy_offset = np.timedelta64(tz_offset.days, "D") + np.timedelta64(
         tz_offset.seconds, "s"
     )
     data_array[time_coord] = time_values + numpy_offset
     data_array.attrs["tz_name"] = tz_name
+    data_array.attrs["utc_offset"] = local_datetime.strftime("%:z")
