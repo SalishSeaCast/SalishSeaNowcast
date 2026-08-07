@@ -246,11 +246,12 @@ Use the :guilabel:`Volumes > Volumes` section of the web interface to manage the
 To create a persistent shared storage volume that will be mounted on all instances use the :guilabel:`Create Volume` button and fill in the dialog with the following parameters:
 
 * Volume Name: ``nemoShare``
-* Description: ``SalishSeaCast system shared persistent storage``
+* Description: ``Shared persistent storage for SalishSeaCast system``
 * Volume Source: ``No source, empty volume``
-* Type: ``Default``
-* Size (GB): ``1024``
+* Type: ``rbd1``
+* Size (GiB): ``1024``
 * Availability Zone: ``nova``
+* Group: ``no group``
 
 Use :guilabel:`Actions > Manage Attachments` to attach the volume to the ``nowcast0`` :ref:`HeadNodeInstance`.
 
