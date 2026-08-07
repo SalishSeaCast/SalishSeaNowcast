@@ -60,8 +60,8 @@ Network
 
 The network configuration was done for us by Compute Canada.
 It's configuration can be inspected via the :guilabel:`Network` section of the web interface.
-The subnet of the VMs is ``rrg-allen-network`` and it routes to the public network via the ``rrg-allen-router``.
-There is 1 floating IP address available for assignment to provide access from the public network to a VM.
+The subnet of the VMs is ``ctb-onc-allen-network`` and it routes to the public network via the ``ctb-onc-allen-router``.
+There are 2 floating IP address available for assignment to provide access from the public network to a VM.
 
 
 .. _AccessAndSecurity:
@@ -74,7 +74,7 @@ Generate an ssh key pair on a Linux or OS/X system using the command:
 .. code-block:: console
 
     $ cd $HOME/.ssh/
-    $ ssh -t rsa -b 4096 -f ~/.ssh/arbutus.cloud_id_rsa -C <yourname>-arbutus.cloud
+    $ ssh -t ed25519 -f ~/.ssh/arbutus.cloud_ed25519 -C <yourname>-arbutus.cloud
 
 Assign a strong passphrase to the key pair when prompted.
 Passphraseless keys have their place,
@@ -82,31 +82,37 @@ but they are a bad idea for general use.
 
 Import the public key into the web interface via the :guilabel:`Compute > Key Pairs > Import Key Pair` button.
 
-Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated with the :guilabel:`default` security group to add security rules to allow:
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`default` security group to add security rules to allow incoming :command:`ssh`
+connections from any IPv4 or IPv6 address:
 
-* :command:`ssh`
-* :command:`ping`
-* ZeroMQ distributed logging subscriptions
+* IPv4 rule:
 
-access to the image instances.
+   * Description: ssh ingress from any IPv4 address
+   * Rule: SSH
+   * Remote: CIDR
+   * CIDR: 0.0.0.0/0
 
-:command:`ssh` Rule:
+* IPv6 rule:
 
-* Rule: SSH
-* Remote: CIDR
-* CIDR: 0.0.0.0/0
+   * Description: ssh ingress from any IPv6 address
+   * Rule: SSH
+   * Remote: CIDR
+   * CIDR: ::/0
 
-:command:`ping` Rule:
+Use the :guilabel:`Compute > Network > Security Groups > Create Security Group` button to create
+a security group for the ZeroMQ distributed logging subscriptions:
 
-* Rule: ALL ICMP
-* Direction: Ingress
-* Remote: CIDR
-* CIDR: 0.0.0.0/0
+* Name: SalishSeaCast Automation
+* Description: Rules for SalishSeaCast automation system workers messages ingress from UBC EOAS servers
 
-ZeroMQ distributed logging subscription Rules:
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`SalishSeaCast Automation` security group to add security rules to allow incoming TCP
+connections on specific ports from the EOAS servers IPv4 address range:
 
 * For :py:mod:`~nowcast.workers.run_NEMO` and :py:mod:`~nowcast.workers.watch_NEMO`:
 
+  * Description: IPv4 ingress for run_NEMO and watch_NEMO workers from EOAS servers
   * Rule: Custom TCP
   * Direction: Ingress
   * Port range: 5556 - 5557
@@ -118,11 +124,31 @@ ZeroMQ distributed logging subscription Rules:
   :py:mod:`~nowcast.workers.run_ww3`,
   and :py:mod:`~nowcast.workers.watch_ww3`:
 
+  * Description: IPv4 ingress for make_ww3_wind_file, make_ww3_current_file, run_ww3, and watch_ww3 workers from EOAS servers
   * Rule: Custom TCP
   * Direction: Ingress
   * Port range: 5570 - 5573
   * Remote: CIDR
   * CIDR: 142.103.36.0/24
+
+Use the :guilabel:`Compute > Network > Security Groups > Create Security Group` button to create
+a security group for UptimeRobot monitoring pings:
+
+* Name: UptimeRobot
+* Description: UptimeRobot monitoring pings
+
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`UptimeRobot` security group to add security rules to allow incoming ICMP
+connections from specific UptimeRobot server IPv4 addresses.
+Example:
+
+* Description: UptimeRobot monitoring
+* Rule: All ICMP
+* Direction: Ingress
+* Remote: CIDR
+* CIDR: 3.77.67.4/32
+
+The list of server addresses is the Europe collection at https://uptimerobot.com/help/locations/.
 
 
 .. _HeadNodeInstance:
