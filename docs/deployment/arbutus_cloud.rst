@@ -170,17 +170,14 @@ On the :guilabel:`Source` tab set the following parameters:
 
 * Select Boot Source: ``Image``
 * Create New Volume: ``No``
-* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
+* Image: ``Ubuntu-24.04-x64-2025-08``
 
-.. note::
-    We have to use the ``Ubuntu-18.04-Bionic-x64-2018-09`` image,
-    not the ``Ubuntu-18.04-Bionic-minimal-x64-2018-08`` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
+On the :guilabel:`Flavor` tab choose: ``cb16-60gb-560``
 
-On the :guilabel:`Flavor` tab choose: ```nemo-c16-60gb-90-numa-test```
+On the :guilabel:`Network` tab confirm that ``ctb-onc-allen-network`` is selected.
 
-On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
-
-On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
+On the :guilabel:`Security Groups` tab confirm that ``default`` is selected
+and add ``UptimeRobot`` and ``SalishSeaCast Automation``.
 
 On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
 
@@ -192,9 +189,9 @@ On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :
     Only 1 key can be loaded automatically into an instance on launch.
     Additional public keys can be loaded once an instance is running.
 
-Click the :guilabel:`Launch` button to launch the instance.
+Click the :guilabel:`Launch Instance` button to launch the instance.
 
-Once the instance is running use the :guilabel:`More > Associate Floating IP`
+Once the instance is running use the :guilabel:`Actions > Associate Floating IP`
 menu item to associate a public IP address with the instance.
 
 
@@ -217,11 +214,11 @@ On the :guilabel:`Source` tab set the following parameters:
 
 * Select Boot Source: ``Image``
 * Create New Volume: ``No``
-* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
+* Image: ``Ubuntu-24.04-x64-2025-08``
 
-On the :guilabel:`Flavor` tab choose: ``nemo-c16-60gb-90-numa-test``
+On the :guilabel:`Flavor` tab choose: ``cb16-60gb-560``
 
-On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
+On the :guilabel:`Network` tab confirm that ``ctb-onc-allen-network`` is selected.
 
 On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
 
@@ -236,7 +233,7 @@ On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the
     Only 1 key can be loaded automatically into an instance on launch.
     Additional public keys can be loaded once an instance is running.
 
-Click the :guilabel:`Launch` button to launch the instance.
+Click the :guilabel:`Launch Instance` button to launch the instance.
 
 
 .. _PersistentSharedStorage:
