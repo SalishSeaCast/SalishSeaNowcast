@@ -263,7 +263,7 @@ Log in to the publicly accessible head node instance with the command:
 
 .. code-block:: console
 
-    $ ssh -i $HOME/.ssh/arbutus.cloud_id_rsa ubuntu@<ip-address>
+    $ ssh -i $HOME/.ssh/arbutus.cloud_ed25519 ubuntu@<ip-address>
 
 The first time you connect to an instance you will be prompted to accept its RSA host key fingerprint.
 You can verify the fingerprint by looking for the ``SSH HOST KEY FINGERPRINT`` section in the instance log in the :guilabel:`Instances > nowcast0 > Log` tab.
@@ -277,7 +277,7 @@ You can add the key to the agent yourself with the command:
 
 .. code-block:: console
 
-    $ ssh-add $HOME/.ssh/arbutus.cloud_id_rsa
+    $ ssh-add $HOME/.ssh/arbutus.cloud_ed25519
 
 You can list the keys that the agent is managing for you with:
 
@@ -292,7 +292,7 @@ You can simplify logins to the instance by adding the following lines to your :f
     Host arbutus.cloud
       Hostname        <ip-address>
       User            ubuntu
-      IdentityFile    ~/.ssh/arbutus.cloud_id_rsa
+      IdentityFile    ~/.ssh/arbutus.cloud_ed25519
       ForwardAgent    yes
 
 With that in place you should be able to connect to the instance with:
@@ -300,6 +300,35 @@ With that in place you should be able to connect to the instance with:
 .. code-block:: console
 
     $ ssh arbutus.cloud
+
+Generate a passphrase-less ssh key pair that will be used for nowcast cloud operations on a Linux or OS/X system using the command:
+
+.. code-block:: console
+
+    $ cd $HOME/.ssh/
+    $ ssh-keygen -t ed25519 -f ~/.ssh/SalishSeaCast-automation_ed25519 -C "SalishSeaCast-automation_ed25519 <ddmmmyy>"
+
+with the days date in place of ``<ddmmmyy>``.
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
+
+Add the public key to the :file:`$HOME/.ssh/authorized_keys` file on the head node with the command:
+
+.. code-block:: console
+
+   $ ssh-copy-id -i SalishSeaCast-automation_ed25519 new-arbutus.cloud
+
+Add the following ``Host`` block to your :file:`$HOME/.ssh/config` file:
+
+.. code-block:: text
+
+    Host arbutus.cloud-nowcast
+      Hostname        <ip-address>
+      User            ubuntu
+      IdentityFile ~/.ssh/SalishSeaCast-automation_ed25519
+      IdentitiesOnly yes
+      IdentityAgent None
+      ForwardAgent    no
 
 
 Provisioning and Configuration
@@ -347,7 +376,7 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
     $ sudo apt install -y python3-pip python3-dev
     $ sudo apt install -y nfs-common nfs-kernel-server
 
-Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` pm the head node:
+Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the head node:
 
 .. code-block:: console
 
