@@ -76,6 +76,7 @@ def make_live_ocean_files(parsed_args, config, *args):
         bc_filepath.unlink()
     meshfilename = Path(config["temperature salinity"]["mesh mask"])
     download_dir = Path(config["temperature salinity"]["download"]["dest dir"])
+    download_file = Path(config["temperature salinity"]["download"]["file name"])
     LO_to_SSC_parameters = LiveOcean_parameters.set_parameters(
         config["temperature salinity"]["parameter set"]
     )
@@ -85,6 +86,7 @@ def make_live_ocean_files(parsed_args, config, *args):
         meshfilename=meshfilename,
         bc_dir=bc_dir,
         LO_dir=download_dir,
+        LO_file=download_file,
         LO_to_SSC_parameters=LO_to_SSC_parameters,
     )
     logger.info(f"Stored T&S western boundary conditions file: {filepath}")
