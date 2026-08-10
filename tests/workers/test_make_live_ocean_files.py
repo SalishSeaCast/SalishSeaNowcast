@@ -39,6 +39,7 @@ def config(base_config):
                 temperature salinity:
                   download:
                     dest dir: forcing/LiveOcean/downloaded
+                    file name: low_passed_UBC.nc
                   bc dir: forcing/LiveOcean/boundary_conditions
                   file template: 'LiveOcean_v201905_{:y%Ym%md%d}.nc'
                   mesh mask: grid/mesh_mask201702.nc
@@ -112,6 +113,7 @@ class TestConfig:
             temperature_salinity["download"]["dest dir"]
             == "/results/forcing/LiveOcean/downloaded/"
         )
+        assert temperature_salinity["download"]["file name"] == "low_passed_UBC.nc"
         assert temperature_salinity["parameter set"] == "v201905"
 
 
@@ -157,7 +159,13 @@ class TestMakeLiveOceanFiles:
     @pytest.fixture
     def mock_create_LiveOcean_TS_BCs(config, monkeypatch):
         def _mock_create_LiveOcean_TS_BCs(
-            date, file_template, meshfilename, bc_dir, LO_dir, LO_to_SSC_parameters
+            date,
+            file_template,
+            meshfilename,
+            bc_dir,
+            LO_dir,
+            LO_file,
+            LO_to_SSC_parameters,
         ):
             return (
                 "forcing/LiveOcean/boundary_conditions/LiveOcean_v201905_y2024m07d26.nc"
