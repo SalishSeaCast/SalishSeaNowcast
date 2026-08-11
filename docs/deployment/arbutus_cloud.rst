@@ -81,6 +81,10 @@ Passphraseless keys have their place,
 but they are a bad idea for general use.
 
 Import the public key into the web interface via the :guilabel:`Compute > Key Pairs > Import Key Pair` button.
+Using a key pair with a passphrase in this context is more secure and allows for more flexibility:
+in particular,
+the possibility of revoking the passphrase-less key pairs generated later for operations
+without loosing login access to the instances.
 
 Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
 with the :guilabel:`default` security group to add security rules to allow incoming :command:`ssh`
@@ -338,13 +342,15 @@ Head Node
 ---------
 
 Fetch and apply any available updates on the ``nowcast0`` :ref:`HeadNodeInstance`
-that you launched above with:
+that you launched above,
+and reboot the instance with:
 
 .. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
-    $ sudo apt auto-remove
+    $ sudo apt autoremove
+    $ sudo shutdown -r now
 
 Set the timezone with:
 
@@ -355,7 +361,7 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the ``systemd-timesyncd.service`` is activate with:
+and that the NTP service is active with:
 
 .. code-block:: console
 
@@ -366,15 +372,16 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
 .. code-block:: console
 
     $ sudo apt update
-    $ sudo apt install -y mercurial git
-    $ sudo apt install -y gfortran
-    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y gfortran g++
+    $ sudo apt install -y libopenmpi-dev openmpi-bin
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
     $ sudo apt install -y nco
-    $ sudo apt install -y liburi-perl m4
+    $ sudo apt install -y liburi-perl
     $ sudo apt install -y make cmake ksh mg
-    $ sudo apt install -y python3-pip python3-dev
     $ sudo apt install -y nfs-common nfs-kernel-server
+    $ sudo add-apt-repository -y ppa:git-core/ppa
+    $ sudo apt update
+    $ sudo apt upgrade
 
 Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the head node:
 
@@ -383,21 +390,20 @@ Copy the public key of the passphrase-less ssh key pair that will be used for no
     # on a system where they key pair is stored
     $ ssh-copy-id -f -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
 
-Copy the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` as :file:`id_rsa` and :file:`id_rsa.pub` for :command:`mpirun` to use for communication with the compute instances:
+Generate a passphrase-less ssh key pair that will be used for MPI communications among the cloud VMs using the command:
 
 .. code-block:: console
 
-    # on a system where they key pair is stored
-    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud:.ssh/id_rsa
-    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa.pub arbutus.cloud:.ssh/id_rsa.pub
+    $ cd $HOME/.ssh/
+    $ `ssh-keygen -t ed25519 -C ctb-onc-allen-mpi-nodes`
 
-The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
-but using a key pair with a passphrase there allows for more flexibility:
-in particular,
-the possibility of revoking the passphrase-less key pair without loosing access to the instances.
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
 
-Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
-and export environment variables to enable wwatch3 to use netCDF4:
+Create :file:`$HOME/.bash_aliases` containing commands to:
+
+* add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
+  and export environment variables to enable wwatch3 to use netCDF4:
 
 .. code-block:: console
 
@@ -411,10 +417,9 @@ and export environment variables to enable wwatch3 to use netCDF4:
 
     # Enable wwatch3 to use netCDF4
     export WWATCH3_NETCDF=NC4
-    export NETCDF_CONFIG=$(which nc-config)
+    export NETCDF_CONFIG=$(which nf-config)
 
-Create :file:`$HOME/.bash_aliases` containing commands to include full time stamps in
-:command:`ls` and to make :command:`rm` default to prompting for confirmation:
+* include full time stamps in :command:`ls` and to make :command:`rm` default to prompting for confirmation:
 
 .. code-block:: console
 
