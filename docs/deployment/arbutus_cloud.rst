@@ -312,7 +312,8 @@ Generate a passphrase-less ssh key pair that will be used for nowcast cloud oper
     $ cd $HOME/.ssh/
     $ ssh-keygen -t ed25519 -f ~/.ssh/SalishSeaCast-automation_ed25519 -C "SalishSeaCast-automation_ed25519 <ddmmmyy>"
 
-with the days date in place of ``<ddmmmyy>``.
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``29jun26``.
 To make the key pair passphrase-less,
 hit enter when prompted for a passphrase.
 
@@ -513,13 +514,16 @@ Restart the NFS service:
 Compute Node Template
 ---------------------
 
-Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance` that you launched above with:
+Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance`
+that you launched above,
+and reboot the instance with:
 
 .. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
     $ sudo apt auto-remove
+    $ sudo shutdown -r now
 
 Set the timezone with:
 
@@ -530,44 +534,29 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the ``systemd-timesyncd.service`` is activate with:
+and that the NTP service is active with:
 
 .. code-block:: console
 
     $ timedatectl status
 
-Provision the :ref:`HeadNodeInstance` with the following packages:
+Provision the :ref:`ComputeNodeInstance` with the following packages:
 
 .. code-block:: console
 
     $ sudo apt update
-    $ sudo apt install -y gfortran
-    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y gfortran g++
+    $ sudo apt install -y libopenmpi-dev openmpi-bin
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
     $ sudo apt install -y mg
     $ sudo apt install -y nfs-common
 
-Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
-and export environment variables to enable wwatch3 to use netCDF4:
+Create :file:`$HOME/.bash_aliases` containing commands to include full time stamps in
+:command:`ls` and to make :command:`rm` default to prompting for confirmation:
 
 .. code-block:: console
 
-    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
-    fi
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
-    fi
-
-    # Enable wwatch3 to use netCDF4
-    export WWATCH3_NETCDF=NC4
-    export NETCDF_CONFIG=$(which nc-config)
-
-Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
-
-.. code-block:: console
-
+    alias lf="ls -ltr --full-time"
     alias rm="rm -i"
 
 Create the :file:`/nemoShare/` mount point,
@@ -579,15 +568,18 @@ and set the owner and group:
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
 
 From the head node,
-copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the compute node:
+copy the public key of the passphrase-less ssh key pair that will be used for
+MPI communications among the VMs into :file:`$HOME/.ssh/authorized_keys` on the compute node:
 
 .. code-block:: console
 
     # on nowcast0
-    $ ssh-copy-id -f -i $HOME/.ssh/id_rsa nowcast1
+    $ ssh-copy-id -f -i $HOME/.ssh/id_ed25519 nowcast1
 
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
-Use a name like ``nowcast-c16-60g-numa-compute-v0`` for the image.
+Use a name like ``compute-cb16-60gb-560-<ddmmmyy>`` for the image,
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``30jun26``.
 
 
 Hosts Mappings
