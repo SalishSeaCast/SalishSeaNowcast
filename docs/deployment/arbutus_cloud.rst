@@ -497,15 +497,16 @@ Add the following line to :file:`/etc/fstab`:
 
 Add the following lines to :file:`/etc/exports`:
 
-.. code-block:: console
+.. code-block:: text
 
-    /export        192.168.238.0/24(rw,fsid=0,insecure,no_subtree_check,async)
-    /export/MEOPAR 192.168.238.0/24(rw,nohide,insecure,no_subtree_check,async)
+    /export        192.168.156.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+    /export/MEOPAR 192.168.156.0/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
-  .. code-block:: console
+.. code-block:: console
 
+    $ sudo systemctl daemon-reload
     $ sudo systemctl start nfs-kernel-server.service
 
 
