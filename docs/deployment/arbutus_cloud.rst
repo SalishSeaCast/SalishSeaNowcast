@@ -587,53 +587,47 @@ Hosts Mappings
 
 Once all of the compute node VMs have been launched so that we know their IP addresses,
 create an :file:`.ssh/config` file,
-and MPI hosts mapping files for NEMO/WAVEWATCH VMs and FVCOM VMs on the head node.
+and MPI hosts mapping files on the head node for the NEMO/WAVEWATCH VMs.
 
 Head Node :file:`.ssh/config`
 -----------------------------
 
 .. code-block:: text
 
-    Host *
-       StrictHostKeyChecking no
+   Host *
+        StrictHostKeyChecking no
 
-    # Head node and XIOS host
-    Host nowcast0
-    HostName 192.168.238.14
+   # Head node and XIOS host
+   Host nowcast0
+     HostName 192.168.156.218
 
-    # NEMO compute nodes
-    Host nowcast1
-    HostName 192.168.238.10
-    Host nowcast2
-    HostName 192.168.238.13
-    Host nowcast3
-    HostName 192.168.238.8
-    Host nowcast4
-    HostName 192.168.238.16
-    Host nowcast5
-    HostName 192.168.238.5
-    Host nowcast6
-    HostName 192.168.238.6
-    Host nowcast7
-    HostName 192.168.238.18
-    Host nowcast8
-    HostName 192.168.238.15
+   # NEMO compute nodes
+   Host nowcast1
+     HostName 192.168.156.26
+   Host nowcast2
+     HostName 192.168.156.151
+   Host nowcast3
+     HostName 192.168.156.41
+   Host nowcast4
+     HostName 192.168.156.12
+   Host nowcast5
+     HostName 192.168.156.13
+   Host nowcast6
+     HostName 192.168.156.246
+   Host nowcast7
+     HostName 192.168.156.49
 
-    # FVCOM compute nodes
-    Host fvcom0
-    HostName 192.168.238.12
-    Host fvcom1
-    HostName 192.168.238.7
-    Host fvcom2
-    HostName 192.168.238.20
-    Host fvcom3
-    HostName 192.168.238.11
-    Host fvcom4
-    HostName 192.168.238.9
-    Host fvcom5
-    HostName 192.168.238.28
-    Host fvcom6
-    HostName 192.168.238.27
+   # wwatch3 compute nodes
+   Host wwatch1
+     HostName 192.168.156.93
+   Host wwatch2
+     HostName 192.168.156.69
+   Host wwatch3
+     HostName 192.168.156.55
+   Host wwatch4
+     HostName 192.168.156.91
+   Host wwatch5
+     HostName 192.168.156.167
 
 
 MPI Hosts Mappings
@@ -643,31 +637,28 @@ MPI Hosts Mappings
 
 .. code-block:: text
 
-    192.168.238.10 slots=15 max-slots=16
-    192.168.238.13 slots=15 max-slots=16
-    192.168.238.8  slots=15 max-slots=16
-    192.168.238.16 slots=15 max-slots=16
-    192.168.238.5  slots=15 max-slots=16
-    192.168.238.6  slots=15 max-slots=16
-    192.168.238.18 slots=15 max-slots=16
-    192.168.238.15 slots=15 max-slots=16
+   # compute nodes for NEMO processes
+   nowcast1 slots=15 max-slots=16
+   nowcast2 slots=15 max-slots=16
+   nowcast3 slots=15 max-slots=16
+   nowcast4 slots=15 max-slots=16
+   nowcast5 slots=15 max-slots=16
+   nowcast6 slots=15 max-slots=16
+   nowcast7 slots=15 max-slots=16
 
-:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for ``x2`` model configuration runs containing:
+   # head node for XIOS process (must be last)
+   nowcast0 slots=1 max-slots=16
 
-.. code-block:: text
-
-    192.168.238.12 slots=15 max-slots=16
-    192.168.238.7  slots=15 max-slots=16
-
-:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for ``r12`` model configuration runs containing:
+:file:`$HOME/mpi_hosts.wwatch3` for WAVEWATCH VMs:
 
 .. code-block:: text
 
-    192.168.238.20 slots=15 max-slots=16
-    192.168.238.11 slots=15 max-slots=16
-    192.168.238.9  slots=15 max-slots=16
-    192.168.238.28 slots=15 max-slots=16
-    192.168.238.27 slots=15 max-slots=16
+   # compute nodes
+   wwatch1 slots=15 max-slots=16
+   wwatch2 slots=15 max-slots=16
+   wwatch3 slots=15 max-slots=16
+   wwatch4 slots=15 max-slots=16
+   wwatch5 slots=15 max-slots=16
 
 
 Git Repositories
