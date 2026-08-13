@@ -696,7 +696,7 @@ Build XIOS-2 with:
 .. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2
-    $ ./make_xios --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 8
+    $ ./make_xios --full --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 12
 
 
 Build NEMO-3.6
