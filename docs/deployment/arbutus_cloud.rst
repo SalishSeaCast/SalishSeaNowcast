@@ -762,6 +762,9 @@ and make :file:`comp.gnu` executable:
     $ ln -sf comp.gnu comp && chmod +x comp.gnu
     $ ln -sf link.gnu link
 
+Add the ``-fallow-argument-mismatch`` compiler flag to the ``opt`` string at line 85 of the :file:`comp` file.
+The is necessary to get the fairly old ``wwatch3-5.16`` code to compile with the GCC-13 compilers.
+
 Symlink the :file:`SalishSeaWaves/switch` file in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin`:
 
 .. code-block:: console
