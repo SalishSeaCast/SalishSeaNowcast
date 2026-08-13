@@ -675,7 +675,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/SalishSeaWaves.git
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
     $ git clone git@github.com:SalishSeaCast/tides.git
-    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
