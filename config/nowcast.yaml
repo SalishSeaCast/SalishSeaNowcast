@@ -598,7 +598,7 @@ run:
       # Passphrase-less deployment key used by automation for authentication
       # on the host.
       # The key-pair is assumed to be stored in $USER/.ssh/.
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      ssh key: SalishSeaCast-automation_ed25519
       # Location on the compute host of the file that contains IP addresses
       # and MPI slots specifications.
       # Only required for runs on cloud hosts.

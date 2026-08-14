@@ -141,11 +141,17 @@ class TestConfig:
             "optimum-hindcast",
         ]
 
-    def test_default_ssh_keys(self, prod_config):
+    def test_rsa_ssh_keys(self, prod_config):
         for host in prod_config["run"]["enabled hosts"]:
-            if host != "robot.nibi":
+            if host not in {"arbutus.cloud-nowcast", "robot.nibi"}:
                 ssh_key = prod_config["run"]["enabled hosts"][host]["ssh key"]
                 assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
+
+    def test_arbutus_ssh_key(self, prod_config):
+        ssh_key = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"][
+            "ssh key"
+        ]
+        assert ssh_key == "SalishSeaCast-automation_ed25519"
 
     def test_robot_nibi_ssh_key(self, prod_config):
         ssh_key = prod_config["run"]["enabled hosts"]["robot.nibi"]["ssh key"]

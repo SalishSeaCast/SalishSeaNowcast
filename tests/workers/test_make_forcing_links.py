@@ -151,7 +151,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, ssh_key",
         (
-            ("arbutus.cloud-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
+            ("arbutus.cloud-nowcast", "SalishSeaCast-automation_ed25519"),
             ("orcinus-nowcast-agrif", "SalishSeaNEMO-nowcast_id_rsa"),
             ("robot.nibi", "SalishSeaCast_robot.nibi_ed25519"),
             ("optimum-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
