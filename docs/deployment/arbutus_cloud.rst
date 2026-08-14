@@ -811,15 +811,15 @@ for Pixi:
 Delete the ``export PATH="/home/ubuntu/.pixi/bin:$PATH"`` line that the Pixi installer added
 to :file:`~/.bashrc`.
 
+Start a new shell to apply the changes.
+
 Add a Pixi configuration setting to specify the storage location to use for the repository data cache.
-This setting eliminates the warning messages that otherwise appears when the default ``repodata``
+This setting eliminates the warning messages that otherwise appears when the ``repodata``
 cache is written to network-mounted storage.
 
 .. code-block:: console
 
    pixi config set --global cache.repodata /tmp/pixi-cache-$USER/repodata
-
-Start a new shell to apply the changes.
 
 Install the bat_,
 exa_,
