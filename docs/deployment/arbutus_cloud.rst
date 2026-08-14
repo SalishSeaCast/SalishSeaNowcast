@@ -871,8 +871,7 @@ Create a :file:`runs/` directory for the NEMO runs and populate it with:
     $ ln -s ../rivers-climatology
     $ ln -s ../tides
     $ ln -s ../tracers
-
-    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
 
 
 WaveWatch Runs Directories
