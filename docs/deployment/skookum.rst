@@ -165,7 +165,7 @@ On the hosts where the nowcast system NEMO runs will be executed create a
     $ cd runs/
     $ mkdir -p LiveOcean NEMO-atmos rivers ssh
     $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
-    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
     $ ln -s ../grid
     $ ln -s ../rivers-climatology
     $ ln -s ../tides
@@ -175,9 +175,6 @@ The hosts and their :file:`runs` directories presently in use are:
 
 * ``arbutus.cloud``
     See :ref:`ArbutusCloudNEMORunsDirectory`
-
-* ``orcinus``
-    :file:`/home/sallen/MEOPAR/nowcast/`
 
 
 ECCC MSC Datamart Mirror Directories
