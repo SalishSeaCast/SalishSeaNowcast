@@ -32,7 +32,7 @@ In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was 
 .. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
-The ``arbutus.cloud`` dashboard is at https://arbutus.cloud.computecanada.ca/.
+The ``arbutus.cloud`` dashboard is at https://arbutus.alliancecan.ca/.
 
 .. _OpenStack dashboard: https://docs.openstack.org/horizon/stein/user/
 
@@ -46,11 +46,11 @@ used for the `CCDB`_
 Web Interface
 =============
 
-Initial setup was done via the https://arbutus.cloud.computecanada.ca/ web interface with guidance from the
-`Compute Canada Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
+Initial setup was done via the https://arbutus.alliancecan.ca/ web interface with guidance from the
+`Alliance Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
 
-.. _Compute Canada Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
-.. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
+.. _Alliance Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
+.. _OpenStack End User Guide: https://docs.openstack.org/2026.1/user/index.html
 
 The project (aka tenant) name for the SalishSeaCast system is ``ctb-onc-allen``.
 
