@@ -811,12 +811,35 @@ for Pixi:
 Delete the ``export PATH="/home/ubuntu/.pixi/bin:$PATH"`` line that the Pixi installer added
 to :file:`~/.bashrc`.
 
+Add a Pixi configuration setting to specify the storage location to use for the repository data cache.
+This setting eliminates the warning messages that otherwise appears when the default ``repodata``
+cache is written to network-mounted storage.
+
+.. code-block:: console
+
+   pixi config set --global cache.repodata /tmp/pixi-cache-$USER/repodata
+
 Start a new shell to apply the changes.
+
+Install the bat_,
+exa_,
+fd-find_
+and ripgrep_ utilities:
+
+.. code-block:: console
+
+   $ pixi global install bat eza fd-find ripgrep
+
+.. _bat: https://github.com/sharkdp/bat
+.. _exa: https://eza.rocks
+.. _fd-find: https://github.com/sharkdp/fd
+.. _ripgrep: https://github.com/burntsushi/ripgrep
 
 The Python packages that the system depends on are installed in ``default`` environment with:
 
 .. code-block:: console
 
+    $ cd /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/
     $ pixi install
 
 
