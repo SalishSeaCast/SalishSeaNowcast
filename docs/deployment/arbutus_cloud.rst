@@ -937,7 +937,7 @@ their hostnames can be set with:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {1..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"
@@ -947,18 +947,18 @@ Mount shared storage via NFS from head node:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {1..7}
     do
       echo nowcast${n}
       ssh nowcast${n} \
-        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.14:/MEOPAR /nemoShare/MEOPAR"
+        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.156.218:/MEOPAR /nemoShare/MEOPAR"
     done
 
 Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {0..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"
@@ -968,7 +968,7 @@ Confirm that :file:`/nemoShare/MEOPAR/` has the shared storage mounts:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {0..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "ls -l /nemoShare/MEOPAR"
