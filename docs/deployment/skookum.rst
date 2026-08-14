@@ -52,14 +52,41 @@ Install the `Pixi`_ environment and package manager:
 
     $ curl -fsSL https://pixi.sh/install.sh | sh
 
-Add lines to :file:`~/.bashrc` to enable autocompletion for Pixi:
+Add lines to :file:`~/.bash_aliases` to add Pixi to :envvar:`PATH` and to enable autocompletion
+for Pixi:
 
 .. code-block:: console
 
+   # Add Pixi to PATH
+   export PATH="/home/ubuntu/.pixi/bin:$PATH"
    # Enable autocompletion for Pixi
    eval "$(pixi completion --shell bash)"
 
 Start a new shell to apply the changes.
+
+Add a Pixi configuration settings to specify the storage locations to use for the repository data
+and PyPI mapping caches.
+These settings eliminates the warning messages that otherwise appears when the caches are
+written to network-mounted storage.
+
+.. code-block:: console
+
+   pixi config set --global cache.repodata /tmp/pixi-cache-$USER/repodata
+   pixi config set --global pypi-mapping /tmp/pixi-cache-$USER/conda-pypi-mapping
+
+Install the bat_,
+exa_,
+fd-find_
+and ripgrep_ utilities:
+
+.. code-block:: console
+
+   $ pixi global install bat eza fd-find ripgrep
+
+.. _bat: https://github.com/sharkdp/bat
+.. _exa: https://eza.rocks
+.. _fd-find: https://github.com/sharkdp/fd
+.. _ripgrep: https://github.com/burntsushi/ripgrep
 
 The Python packages that the system depends on are installed in ``default`` environment with:
 
