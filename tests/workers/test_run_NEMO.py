@@ -1040,7 +1040,7 @@ class TestBuildScript:
         RUN_DESC="13may17.yaml"
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
+        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
         COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
         GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
 
@@ -1050,8 +1050,7 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 119 --bind-to none ./nemo.exe : \
--host 192.168.238.14 -np 1 --bind-to none ./xios_server.exe \
+        ${{MPIRUN}} -np 1 ./xios_server.exe : -np 119 ./nemo.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -1106,7 +1105,7 @@ class TestDefinitions:
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
+        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
         COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
         GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
@@ -1136,7 +1135,7 @@ class TestDefinitions:
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
+        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
         COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
         GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
@@ -1185,8 +1184,7 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
--host 192.168.1.79 -np 1 --bind-to none ./xios_server.exe \
+        ${MPIRUN} -np 1 ./xios_server.exe : -np 15 ./nemo.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
