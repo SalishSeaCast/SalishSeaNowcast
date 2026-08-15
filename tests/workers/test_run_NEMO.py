@@ -392,7 +392,7 @@ class TestRunDescription:
         host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config = patch.dict(
             host_config["run types"]["nowcast"],
-            {"run sets dir": "foo", "mpi decomposition": "11x18"},
+            {"run sets dir": "foo", "mpi decomposition": "10x17"},
             clear=True,
         )
         caplog.set_level(logging.DEBUG)
@@ -1012,7 +1012,7 @@ class TestBuildScript:
     )
     @patch("nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc")
     @patch(
-        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=119
+        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=103
     )
     def test_script_arbutus_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -1022,7 +1022,7 @@ class TestBuildScript:
         p_config = patch.dict(config["results archive"], {run_type: str(results_dir)})
         m_lrd.return_value = {
             "run_id": "13may17nowcast",
-            "MPI decomposition": "11x18",
+            "MPI decomposition": "10x17",
             "output": {"XIOS servers": 1},
         }
         with p_config:
@@ -1050,7 +1050,7 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 1 ./xios_server.exe : -np 119 ./nemo.exe \
+        ${{MPIRUN}} -np 1 ./xios_server.exe : -np 103 ./nemo.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
