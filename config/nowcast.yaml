@@ -797,7 +797,7 @@ wave forecasts:
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script
-  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
+  salishsea cmd: pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
   # Directories on compute host where results are stored, keyed by run type
   results:
     nowcast: /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/

@@ -153,9 +153,10 @@ class TestConfig:
 
     def test_salishsea_cmd(self, prod_config):
         salishsea_cmd = prod_config["wave forecasts"]["salishsea cmd"]
-        assert (
-            salishsea_cmd == "/nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea"
+        expected = (
+            "pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea"
         )
+        assert salishsea_cmd == expected
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
