@@ -90,19 +90,19 @@ def config(base_config):
                       run types:
                         nowcast:
                           run sets dir: SS-run-sets/v201905/nowcast-blue/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/nowcast/
                         forecast:
                           run sets dir: SS-run-sets/v201905/forecast/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/forecast/
                         forecast2:
                           run sets dir: SS-run-sets/v201905/forecast2/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/forecast2/
                         nowcast-green:
                           run sets dir: SS-run-sets/v201905/nowcast-green/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/nowcast-green/
                       forcing:
                         bottom friction mask: grid/jetty_mask_bathy201702.nc
@@ -469,10 +469,10 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "11x18"),
-            ("arbutus.cloud", "nowcast-green", "11x18"),
-            ("arbutus.cloud", "forecast", "11x18"),
-            ("arbutus.cloud", "forecast2", "11x18"),
+            ("arbutus.cloud", "nowcast", "10x17"),
+            ("arbutus.cloud", "nowcast-green", "10x17"),
+            ("arbutus.cloud", "forecast", "10x17"),
+            ("arbutus.cloud", "forecast2", "10x17"),
         ],
     )
     def test_mpi_decomposition(
