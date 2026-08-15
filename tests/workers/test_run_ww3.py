@@ -153,9 +153,7 @@ class TestConfig:
 
     def test_salishsea_cmd(self, prod_config):
         salishsea_cmd = prod_config["wave forecasts"]["salishsea cmd"]
-        expected = (
-            "pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea"
-        )
+        expected = "/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea"
         assert salishsea_cmd == expected
 
 
