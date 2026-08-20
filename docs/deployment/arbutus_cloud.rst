@@ -915,7 +915,7 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current
 
-  The :program:`make_ww3_wind_file` worker:
+  The :program:`make_ww3_current_file` worker:
 
   * Uses files from the :file:`/nemoShare/MEOPAR/SalishSea/` NEMO results storage tree appropriate for the wwatch3 run date and type to produce a :file:`SoG_current_yyyymmdd.nc` file in the :file:`current/` directory
 
