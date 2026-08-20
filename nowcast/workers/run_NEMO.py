@@ -398,7 +398,6 @@ def _build_script(run_dir, run_type, run_desc_filepath, results_dir, host_name, 
     nemo_processors = nemo_cmd.prepare.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc["output"]["XIOS servers"])
     email = host_config.get("email", "nobody@example.com")
-    xios_host = host_config.get("xios host")
     script = "#!/bin/bash\n"
     if host_config["job exec cmd"] == "qsub":
         script = "\n".join(
@@ -431,7 +430,7 @@ def _build_script(run_dir, run_type, run_desc_filepath, results_dir, host_name, 
                     host_name,
                     config,
                 ),
-                execute=_execute(nemo_processors, xios_processors, xios_host),
+                execute=_execute(nemo_processors, xios_processors),
                 fix_permissions=_fix_permissions(),
                 cleanup=_cleanup(),
             ),
@@ -466,16 +465,11 @@ def _definitions(
     return defns
 
 
-def _execute(nemo_processors, xios_processors, xios_host):
+def _execute(nemo_processors, xios_processors):
     mpirun = (
-        f"${{MPIRUN}} -np {nemo_processors} --bind-to none ./nemo.exe : "
-        f"-np {xios_processors} --bind-to none ./xios_server.exe"
+        f"${{MPIRUN}} -np {xios_processors} ./xios_server.exe : "
+        f"-np {nemo_processors} ./nemo.exe"
     )
-    if xios_host is not None:
-        mpirun = (
-            f"${{MPIRUN}} -np {xios_processors} ./xios_server.exe : "
-            f"-np {nemo_processors} ./nemo.exe"
-        )
     script = (
         "mkdir -p ${RESULTS_DIR}\n"
         "\n"

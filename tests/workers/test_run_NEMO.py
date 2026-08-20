@@ -82,7 +82,6 @@ def config(base_config):
                   enabled hosts:
                     arbutus.cloud:
                       mpi hosts file: ${HOME}/mpi_hosts
-                      xios host: 192.168.238.14
                       run prep dir: nowcast-sys/runs/
                       grid dir: nowcast-sys/grid/
                       salishsea_cmd: /home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
@@ -1148,36 +1147,7 @@ class TestExecute:
     """Unit test for _execute() function."""
 
     def test_execute(self, config):
-        script = run_NEMO._execute(
-            nemo_processors=15, xios_processors=1, xios_host=None
-        )
-        expected = """mkdir -p ${RESULTS_DIR}
-
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
-
-        echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
--np 1 --bind-to none ./xios_server.exe \
->>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
-        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-
-        echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
-        ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
-        echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
-
-        echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
-        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
-        """
-        script = script.splitlines()
-        for i, line in enumerate(expected.splitlines()[:-1]):
-            assert script[i].strip() == line.strip()
-
-    def test_execute_with_xios_host(self, config):
-        script = run_NEMO._execute(
-            nemo_processors=15, xios_processors=1, xios_host="192.168.1.79"
-        )
+        script = run_NEMO._execute(nemo_processors=15, xios_processors=1)
         expected = """mkdir -p ${RESULTS_DIR}
 
         cd ${WORK_DIR}

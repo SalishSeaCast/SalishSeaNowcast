@@ -603,9 +603,6 @@ run:
       # and MPI slots specifications.
       # Only required for runs on cloud hosts.
       mpi hosts file: ${HOME}/mpi_hosts
-      # IP address of the machine to run XIOS on.
-      # Only required for runs on cloud hosts.
-      xios host: 192.168.238.14
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
