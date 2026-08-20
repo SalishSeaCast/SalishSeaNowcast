@@ -927,6 +927,32 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
 
 
+``cron`` Jobs
+=============
+
+Add ``cron`` jobs to remove old results and wwatch3 current and wind forcing files:
+
+.. code-block:: bash
+
+   $ export EDITOR=/usr/bin/mg
+   $ crontab -e
+
+``crontab`` contents:
+
+.. code-block:: text
+
+   # m h  dom mon dow   command
+    0 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 30d . /nemoShare/MEOPAR/SalishSea/nowcast/ -x rm -rf
+    5 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 30d . /nemoShare/MEOPAR/SalishSea/nowcast-green/ -x rm -rf
+   10 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 20d . /nemoShare/MEOPAR/SalishSea/forecast/ -x rm -rf
+   15 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/forecast2/ -x rm -rf
+   20 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/ -x rm -rf
+   25 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/ -x rm -rf
+   30 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/ -x rm -rf
+   35 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type f --changed-before 15d . /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/ -x rm -f
+   40 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type f --changed-before 15d . /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind/ -x rm -f
+
+
 Managing Compute Nodes
 ======================
 
