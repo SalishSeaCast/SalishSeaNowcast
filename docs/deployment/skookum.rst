@@ -410,3 +410,22 @@ Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
         PubkeyAcceptedKeyTypes=+ssh-rsa
         IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
         ForwardAgent no
+
+
+Firewall Rule
+=============
+
+Confirm that a firewall rule exists to allow incoming connections from the ``arbutus.cloud`` head node
+to the ``log_aggregator`` ports.
+View the firewall rules with:
+
+.. code-block:: bash
+
+    $ sudo ufw status
+
+If necessary,
+create the rule with:
+
+.. code-block:: bash
+
+    $ sudo ufw allow from <ip-address>
