@@ -52,7 +52,7 @@ Install the `Pixi`_ environment and package manager:
 
     $ curl -fsSL https://pixi.sh/install.sh | sh
 
-Add lines to :file:`~/.bash_aliases` to add Pixi to :envvar:`PATH` and to enable autocompletion
+Add lines to :file:`~/.bashrc` to add Pixi to :envvar:`PATH` and to enable autocompletion
 for Pixi:
 
 .. code-block:: console
