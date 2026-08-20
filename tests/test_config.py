@@ -124,6 +124,8 @@ class TestLoggingPublisher:
             "reshapr",
             "checklist",
             "cfgrib",
+            "findlibs",
+            "gribapi",
             "matplotlib",
             "PIL",
             "paramiko",

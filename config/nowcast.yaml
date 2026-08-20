@@ -929,6 +929,16 @@ logging:
         qualname: cfgrib
         level: ERROR
         formatter: simple
+      findlibs:
+        # findlibs library used by python-eccodes that injects its log messages into all workers
+        qualname: findlibs
+        level: WARNING
+        formatter: simple
+      gribapi:
+        # python-eccodes library that injects its log messages into all workers
+        qualname: gribapi
+        level: WARNING
+        formatter: simple
       matplotlib:
         # matplotlib library used by figure modules
         qualname: matplotlib
