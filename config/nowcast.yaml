@@ -598,14 +598,11 @@ run:
       # Passphrase-less deployment key used by automation for authentication
       # on the host.
       # The key-pair is assumed to be stored in $USER/.ssh/.
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      ssh key: SalishSeaCast-automation_ed25519
       # Location on the compute host of the file that contains IP addresses
       # and MPI slots specifications.
       # Only required for runs on cloud hosts.
       mpi hosts file: ${HOME}/mpi_hosts
-      # IP address of the machine to run XIOS on.
-      # Only required for runs on cloud hosts.
-      xios host: 192.168.238.14
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
@@ -624,7 +621,7 @@ run:
       grid dir: /nemoShare/MEOPAR/nowcast-sys/grid/
       # Path to the salishsea command processor executable to use in the run
       # script
-      salishsea_cmd: pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
+      salishsea_cmd: /home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
       # Executable to use to submit the SalishSeaNEMO.sh script to be run
       job exec cmd: bash
       # Run type specific configurations for the runs that are executed on the
@@ -634,20 +631,20 @@ run:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-blue/
           # How is the domain to be distributed over the processors in the
           # i (longitude) and j (latitude) directions?
-          mpi decomposition: 11x18
+          mpi decomposition: 10x17
           # Directory on compute host where results are stored
           results: /nemoShare/MEOPAR/SalishSea/nowcast/
         forecast:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast/
-          mpi decomposition: 11x18
+          mpi decomposition: 10x17
           results: /nemoShare/MEOPAR/SalishSea/forecast/
         forecast2:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast2/
-          mpi decomposition: 11x18
+          mpi decomposition: 10x17
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-green/
-          mpi decomposition: 11x18
+          mpi decomposition: 10x17
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forcing:
         # Directory on compute host where Neah Bay sea surface height forcing files
@@ -797,7 +794,7 @@ wave forecasts:
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script
-  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
+  salishsea cmd: /home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
   # Directories on compute host where results are stored, keyed by run type
   results:
     nowcast: /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/
@@ -929,6 +926,16 @@ logging:
         qualname: cfgrib
         level: ERROR
         formatter: simple
+      findlibs:
+        # findlibs library used by python-eccodes that injects its log messages into all workers
+        qualname: findlibs
+        level: WARNING
+        formatter: simple
+      gribapi:
+        # python-eccodes library that injects its log messages into all workers
+        qualname: gribapi
+        level: WARNING
+        formatter: simple
       matplotlib:
         # matplotlib library used by figure modules
         qualname: matplotlib
@@ -1001,12 +1008,12 @@ zmq:
         5590, 5591, 5592, 5593, 5594, 5595, 5596, 5597, 5598, 5599,
       ]
     # **host:port pairs in lists must be quoted to protect ":" characters**
-      run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.100.213:5556']
-      watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.100.213:5557']
-      make_ww3_wind_file: '206.12.100.213:5570'
-      make_ww3_current_file: '206.12.100.213:5571'
-      run_ww3: '206.12.100.213:5572'
-      watch_ww3: '206.12.100.213:5573'
+      run_NEMO: ["salish.eos.ubc.ca:5556", "134.87.9.24:5556"]
+      watch_NEMO: ["salish.eos.ubc.ca:5557", "134.87.9.24:5557"]
+      make_ww3_wind_file: "134.87.9.24:5570"
+      make_ww3_current_file: "134.87.9.24:5571"
+      run_ww3: "134.87.9.24:5572"
+      watch_ww3: "134.87.9.24:5573"
       make_averaged_dataset: [
         "salish.eos.ubc.ca:5562", "salish.eos.ubc.ca:5563", "salish.eos.ubc.ca:5564",
         "salish.eos.ubc.ca:5565", "salish.eos.ubc.ca:5566", "salish.eos.ubc.ca:5567",

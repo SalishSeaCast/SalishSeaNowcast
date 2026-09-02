@@ -37,6 +37,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
     $ git clone git@github.com:SalishSeaCast/tidal-predictions.git
     $ git clone git@github.com:SalishSeaCast/tides.git
+    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
 
 
@@ -51,14 +52,41 @@ Install the `Pixi`_ environment and package manager:
 
     $ curl -fsSL https://pixi.sh/install.sh | sh
 
-Add lines to :file:`~/.bashrc` to enable autocompletion for Pixi:
+Add lines to :file:`~/.bashrc` to add Pixi to :envvar:`PATH` and to enable autocompletion
+for Pixi:
 
 .. code-block:: console
 
+   # Add Pixi to PATH
+   export PATH="/home/ubuntu/.pixi/bin:$PATH"
    # Enable autocompletion for Pixi
    eval "$(pixi completion --shell bash)"
 
 Start a new shell to apply the changes.
+
+Add a Pixi configuration settings to specify the storage locations to use for the repository data
+and PyPI mapping caches.
+These settings eliminates the warning messages that otherwise appears when the caches are
+written to network-mounted storage.
+
+.. code-block:: console
+
+   pixi config set --global cache.repodata /tmp/pixi-cache-$USER/repodata
+   pixi config set --global pypi-mapping /tmp/pixi-cache-$USER/conda-pypi-mapping
+
+Install the bat_,
+exa_,
+fd-find_
+and ripgrep_ utilities:
+
+.. code-block:: console
+
+   $ pixi global install bat eza fd-find ripgrep
+
+.. _bat: https://github.com/sharkdp/bat
+.. _exa: https://eza.rocks
+.. _fd-find: https://github.com/sharkdp/fd
+.. _ripgrep: https://github.com/burntsushi/ripgrep
 
 The Python packages that the system depends on are installed in ``default`` environment with:
 
@@ -137,7 +165,7 @@ On the hosts where the nowcast system NEMO runs will be executed create a
     $ cd runs/
     $ mkdir -p LiveOcean NEMO-atmos rivers ssh
     $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
-    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
     $ ln -s ../grid
     $ ln -s ../rivers-climatology
     $ ln -s ../tides
@@ -147,9 +175,6 @@ The hosts and their :file:`runs` directories presently in use are:
 
 * ``arbutus.cloud``
     See :ref:`ArbutusCloudNEMORunsDirectory`
-
-* ``orcinus``
-    :file:`/home/sallen/MEOPAR/nowcast/`
 
 
 ECCC MSC Datamart Mirror Directories
@@ -298,15 +323,19 @@ Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers`
 ``ssh`` Keys and Configuration
 ==============================
 
-Generate a passphrase-less RSA key pair to use for connections to most remote hosts:
+Generate a passphrase-less ED25519 key pair to use for connections to most remote hosts:
 
 .. code-block:: console
 
-    $ ssh-keygen -t rsa -f $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa -C SalishSeaNEMO-nowcast
+    $ ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast-automation_ed25519 \
+        -C "SalishSeaCast-automation_ed25519 <ddmmmyy>"
 
-Use :command:`ssh-copy-id` to install the public key on ``arbutus``,
-``optimum``,
-and ``orcinus``;
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``29jun26``.
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
+
+Use :command:`ssh-copy-id` to install the public key on ``arbutus`` and ``orcinus``;
 e.g.
 
 .. code-block:: console
@@ -317,7 +346,8 @@ Generate a passphrase-less ED25519 key pair to use for connections to the ``nibi
 
 .. code-block:: console
 
-    $ ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.nibi_ed25519 -C "SalishSeaCast robot.nibi"
+    $ ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.nibi_ed25519 \
+        -C "SalishSeaCast robot.nibi"
 
 Edit the public key to prefix it with the constraint predicates necessary for automation in the
 context of multuifactor authentication on the ``nibi`` cluster.
@@ -330,6 +360,25 @@ The constraint predicates are:
 Use https://ccdb.computecanada.ca/ssh_authorized_keys to install the public key for ``nibi`` via
 the Alliance CCDB.
 
+``optimum`` doesn't support ed25519 keys.
+So,
+generate a passphrase-less RSA key pair to use for connections to it:
+
+.. code-block:: console
+
+    $ ssh-keygen -t rsa -f $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa -C SalishSeaNEMO-nowcast
+
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
+
+Use :command:`ssh-copy-id` to install the public key on ``optimum``;
+e.g.
+
+.. code-block:: console
+
+    $ ssh-copy-id -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa optimum
+
+
 Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
 
 .. code-block:: text
@@ -337,7 +386,7 @@ Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
     Host arbutus.cloud-nowcast
         HostName        <ip-address>
         User            ubuntu
-        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        IdentityFile ~/.ssh/SalishSeaCast-automation_ed25519
         ForwardAgent    no
 
     Host robot.nibi
@@ -361,3 +410,22 @@ Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
         PubkeyAcceptedKeyTypes=+ssh-rsa
         IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
         ForwardAgent no
+
+
+Firewall Rule
+=============
+
+Confirm that a firewall rule exists to allow incoming connections from the ``arbutus.cloud`` head node
+to the ``log_aggregator`` ports.
+View the firewall rules with:
+
+.. code-block:: bash
+
+    $ sudo ufw status
+
+If necessary,
+create the rule with:
+
+.. code-block:: bash
+
+    $ sudo ufw allow from <ip-address>

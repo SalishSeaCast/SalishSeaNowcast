@@ -32,7 +32,7 @@ In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was 
 .. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
-The ``arbutus.cloud`` dashboard is at https://arbutus.cloud.computecanada.ca/.
+The ``arbutus.cloud`` dashboard is at https://arbutus.alliancecan.ca/.
 
 .. _OpenStack dashboard: https://docs.openstack.org/horizon/stein/user/
 
@@ -46,11 +46,11 @@ used for the `CCDB`_
 Web Interface
 =============
 
-Initial setup was done via the https://arbutus.cloud.computecanada.ca/ web interface with guidance from the
-`Compute Canada Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
+Initial setup was done via the https://arbutus.alliancecan.ca/ web interface with guidance from the
+`Alliance Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
 
-.. _Compute Canada Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
-.. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
+.. _Alliance Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
+.. _OpenStack End User Guide: https://docs.openstack.org/2026.1/user/index.html
 
 The project (aka tenant) name for the SalishSeaCast system is ``ctb-onc-allen``.
 
@@ -60,8 +60,8 @@ Network
 
 The network configuration was done for us by Compute Canada.
 It's configuration can be inspected via the :guilabel:`Network` section of the web interface.
-The subnet of the VMs is ``rrg-allen-network`` and it routes to the public network via the ``rrg-allen-router``.
-There is 1 floating IP address available for assignment to provide access from the public network to a VM.
+The subnet of the VMs is ``ctb-onc-allen-network`` and it routes to the public network via the ``ctb-onc-allen-router``.
+There are 2 floating IP address available for assignment to provide access from the public network to a VM.
 
 
 .. _AccessAndSecurity:
@@ -74,39 +74,49 @@ Generate an ssh key pair on a Linux or OS/X system using the command:
 .. code-block:: console
 
     $ cd $HOME/.ssh/
-    $ ssh -t rsa -b 4096 -f ~/.ssh/arbutus.cloud_id_rsa -C <yourname>-arbutus.cloud
+    $ ssh -t ed25519 -f ~/.ssh/arbutus.cloud_ed25519 -C <yourname>-arbutus.cloud
 
 Assign a strong passphrase to the key pair when prompted.
 Passphraseless keys have their place,
 but they are a bad idea for general use.
 
 Import the public key into the web interface via the :guilabel:`Compute > Key Pairs > Import Key Pair` button.
+Using a key pair with a passphrase in this context is more secure and allows for more flexibility:
+in particular,
+the possibility of revoking the passphrase-less key pairs generated later for operations
+without loosing login access to the instances.
 
-Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated with the :guilabel:`default` security group to add security rules to allow:
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`default` security group to add security rules to allow incoming :command:`ssh`
+connections from any IPv4 or IPv6 address:
 
-* :command:`ssh`
-* :command:`ping`
-* ZeroMQ distributed logging subscriptions
+* IPv4 rule:
 
-access to the image instances.
+   * Description: ssh ingress from any IPv4 address
+   * Rule: SSH
+   * Remote: CIDR
+   * CIDR: 0.0.0.0/0
 
-:command:`ssh` Rule:
+* IPv6 rule:
 
-* Rule: SSH
-* Remote: CIDR
-* CIDR: 0.0.0.0/0
+   * Description: ssh ingress from any IPv6 address
+   * Rule: SSH
+   * Remote: CIDR
+   * CIDR: ::/0
 
-:command:`ping` Rule:
+Use the :guilabel:`Compute > Network > Security Groups > Create Security Group` button to create
+a security group for the ZeroMQ distributed logging subscriptions:
 
-* Rule: ALL ICMP
-* Direction: Ingress
-* Remote: CIDR
-* CIDR: 0.0.0.0/0
+* Name: SalishSeaCast Automation
+* Description: Rules for SalishSeaCast automation system workers messages ingress from UBC EOAS servers
 
-ZeroMQ distributed logging subscription Rules:
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`SalishSeaCast Automation` security group to add security rules to allow incoming TCP
+connections on specific ports from the EOAS servers IPv4 address range:
 
 * For :py:mod:`~nowcast.workers.run_NEMO` and :py:mod:`~nowcast.workers.watch_NEMO`:
 
+  * Description: IPv4 ingress for run_NEMO and watch_NEMO workers from EOAS servers
   * Rule: Custom TCP
   * Direction: Ingress
   * Port range: 5556 - 5557
@@ -118,11 +128,31 @@ ZeroMQ distributed logging subscription Rules:
   :py:mod:`~nowcast.workers.run_ww3`,
   and :py:mod:`~nowcast.workers.watch_ww3`:
 
+  * Description: IPv4 ingress for make_ww3_wind_file, make_ww3_current_file, run_ww3, and watch_ww3 workers from EOAS servers
   * Rule: Custom TCP
   * Direction: Ingress
   * Port range: 5570 - 5573
   * Remote: CIDR
   * CIDR: 142.103.36.0/24
+
+Use the :guilabel:`Compute > Network > Security Groups > Create Security Group` button to create
+a security group for UptimeRobot monitoring pings:
+
+* Name: UptimeRobot
+* Description: UptimeRobot monitoring pings
+
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated
+with the :guilabel:`UptimeRobot` security group to add security rules to allow incoming ICMP
+connections from specific UptimeRobot server IPv4 addresses.
+Example:
+
+* Description: UptimeRobot monitoring
+* Rule: All ICMP
+* Direction: Ingress
+* Remote: CIDR
+* CIDR: 3.77.67.4/32
+
+The list of server addresses is the Europe collection at https://uptimerobot.com/help/locations/.
 
 
 .. _HeadNodeInstance:
@@ -144,17 +174,14 @@ On the :guilabel:`Source` tab set the following parameters:
 
 * Select Boot Source: ``Image``
 * Create New Volume: ``No``
-* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
+* Image: ``Ubuntu-24.04-x64-2025-08``
 
-.. note::
-    We have to use the ``Ubuntu-18.04-Bionic-x64-2018-09`` image,
-    not the ``Ubuntu-18.04-Bionic-minimal-x64-2018-08`` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
+On the :guilabel:`Flavor` tab choose: ``cb16-60gb-560``
 
-On the :guilabel:`Flavor` tab choose: ```nemo-c16-60gb-90-numa-test```
+On the :guilabel:`Network` tab confirm that ``ctb-onc-allen-network`` is selected.
 
-On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
-
-On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
+On the :guilabel:`Security Groups` tab confirm that ``default`` is selected
+and add ``UptimeRobot`` and ``SalishSeaCast Automation``.
 
 On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
 
@@ -166,9 +193,9 @@ On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :
     Only 1 key can be loaded automatically into an instance on launch.
     Additional public keys can be loaded once an instance is running.
 
-Click the :guilabel:`Launch` button to launch the instance.
+Click the :guilabel:`Launch Instance` button to launch the instance.
 
-Once the instance is running use the :guilabel:`More > Associate Floating IP`
+Once the instance is running use the :guilabel:`Actions > Associate Floating IP`
 menu item to associate a public IP address with the instance.
 
 
@@ -191,11 +218,11 @@ On the :guilabel:`Source` tab set the following parameters:
 
 * Select Boot Source: ``Image``
 * Create New Volume: ``No``
-* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
+* Image: ``Ubuntu-24.04-x64-2025-08``
 
-On the :guilabel:`Flavor` tab choose: ``nemo-c16-60gb-90-numa-test``
+On the :guilabel:`Flavor` tab choose: ``cb16-60gb-560``
 
-On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
+On the :guilabel:`Network` tab confirm that ``ctb-onc-allen-network`` is selected.
 
 On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
 
@@ -210,7 +237,7 @@ On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the
     Only 1 key can be loaded automatically into an instance on launch.
     Additional public keys can be loaded once an instance is running.
 
-Click the :guilabel:`Launch` button to launch the instance.
+Click the :guilabel:`Launch Instance` button to launch the instance.
 
 
 .. _PersistentSharedStorage:
@@ -223,11 +250,12 @@ Use the :guilabel:`Volumes > Volumes` section of the web interface to manage the
 To create a persistent shared storage volume that will be mounted on all instances use the :guilabel:`Create Volume` button and fill in the dialog with the following parameters:
 
 * Volume Name: ``nemoShare``
-* Description: ``SalishSeaCast system shared persistent storage``
+* Description: ``Shared persistent storage for SalishSeaCast system``
 * Volume Source: ``No source, empty volume``
-* Type: ``Default``
-* Size (GB): ``1024``
+* Type: ``rbd1``
+* Size (GiB): ``1024``
 * Availability Zone: ``nova``
+* Group: ``no group``
 
 Use :guilabel:`Actions > Manage Attachments` to attach the volume to the ``nowcast0`` :ref:`HeadNodeInstance`.
 
@@ -239,7 +267,7 @@ Log in to the publicly accessible head node instance with the command:
 
 .. code-block:: console
 
-    $ ssh -i $HOME/.ssh/arbutus.cloud_id_rsa ubuntu@<ip-address>
+    $ ssh -i $HOME/.ssh/arbutus.cloud_ed25519 ubuntu@<ip-address>
 
 The first time you connect to an instance you will be prompted to accept its RSA host key fingerprint.
 You can verify the fingerprint by looking for the ``SSH HOST KEY FINGERPRINT`` section in the instance log in the :guilabel:`Instances > nowcast0 > Log` tab.
@@ -253,7 +281,7 @@ You can add the key to the agent yourself with the command:
 
 .. code-block:: console
 
-    $ ssh-add $HOME/.ssh/arbutus.cloud_id_rsa
+    $ ssh-add $HOME/.ssh/arbutus.cloud_ed25519
 
 You can list the keys that the agent is managing for you with:
 
@@ -268,7 +296,7 @@ You can simplify logins to the instance by adding the following lines to your :f
     Host arbutus.cloud
       Hostname        <ip-address>
       User            ubuntu
-      IdentityFile    ~/.ssh/arbutus.cloud_id_rsa
+      IdentityFile    ~/.ssh/arbutus.cloud_ed25519
       ForwardAgent    yes
 
 With that in place you should be able to connect to the instance with:
@@ -276,6 +304,36 @@ With that in place you should be able to connect to the instance with:
 .. code-block:: console
 
     $ ssh arbutus.cloud
+
+Generate a passphrase-less ssh key pair that will be used for nowcast cloud operations on a Linux or OS/X system using the command:
+
+.. code-block:: console
+
+    $ cd $HOME/.ssh/
+    $ ssh-keygen -t ed25519 -f ~/.ssh/SalishSeaCast-automation_ed25519 -C "SalishSeaCast-automation_ed25519 <ddmmmyy>"
+
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``29jun26``.
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
+
+Add the public key to the :file:`$HOME/.ssh/authorized_keys` file on the head node with the command:
+
+.. code-block:: console
+
+   $ ssh-copy-id -i SalishSeaCast-automation_ed25519 new-arbutus.cloud
+
+Add the following ``Host`` block to your :file:`$HOME/.ssh/config` file:
+
+.. code-block:: text
+
+    Host arbutus.cloud-nowcast
+      Hostname        <ip-address>
+      User            ubuntu
+      IdentityFile ~/.ssh/SalishSeaCast-automation_ed25519
+      IdentitiesOnly yes
+      IdentityAgent None
+      ForwardAgent    no
 
 
 Provisioning and Configuration
@@ -285,13 +343,15 @@ Head Node
 ---------
 
 Fetch and apply any available updates on the ``nowcast0`` :ref:`HeadNodeInstance`
-that you launched above with:
+that you launched above,
+and reboot the instance with:
 
 .. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
-    $ sudo apt auto-remove
+    $ sudo apt autoremove
+    $ sudo shutdown -r now
 
 Set the timezone with:
 
@@ -302,7 +362,7 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the ``systemd-timesyncd.service`` is activate with:
+and that the NTP service is active with:
 
 .. code-block:: console
 
@@ -313,38 +373,38 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
 .. code-block:: console
 
     $ sudo apt update
-    $ sudo apt install -y mercurial git
-    $ sudo apt install -y gfortran
-    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y gfortran g++
+    $ sudo apt install -y libopenmpi-dev openmpi-bin
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
     $ sudo apt install -y nco
-    $ sudo apt install -y liburi-perl m4
+    $ sudo apt install -y liburi-perl
     $ sudo apt install -y make cmake ksh mg
-    $ sudo apt install -y python3-pip python3-dev
     $ sudo apt install -y nfs-common nfs-kernel-server
+    $ sudo add-apt-repository -y ppa:git-core/ppa
+    $ sudo apt update
+    $ sudo apt upgrade
 
-Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` pm the head node:
+Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the head node:
 
 .. code-block:: console
 
     # on a system where they key pair is stored
     $ ssh-copy-id -f -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
 
-Copy the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` as :file:`id_rsa` and :file:`id_rsa.pub` for :command:`mpirun` to use for communication with the compute instances:
+Generate a passphrase-less ssh key pair that will be used for MPI communications among the cloud VMs using the command:
 
 .. code-block:: console
 
-    # on a system where they key pair is stored
-    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud:.ssh/id_rsa
-    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa.pub arbutus.cloud:.ssh/id_rsa.pub
+    $ cd $HOME/.ssh/
+    $ `ssh-keygen -t ed25519 -C ctb-onc-allen-mpi-nodes`
 
-The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
-but using a key pair with a passphrase there allows for more flexibility:
-in particular,
-the possibility of revoking the passphrase-less key pair without loosing access to the instances.
+To make the key pair passphrase-less,
+hit enter when prompted for a passphrase.
 
-Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
-and export environment variables to enable wwatch3 to use netCDF4:
+Create :file:`$HOME/.bash_aliases` containing commands to:
+
+* add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
+  and export environment variables to enable wwatch3 to use netCDF4:
 
 .. code-block:: console
 
@@ -358,10 +418,9 @@ and export environment variables to enable wwatch3 to use netCDF4:
 
     # Enable wwatch3 to use netCDF4
     export WWATCH3_NETCDF=NC4
-    export NETCDF_CONFIG=$(which nc-config)
+    export NETCDF_CONFIG=$(which nf-config)
 
-Create :file:`$HOME/.bash_aliases` containing commands to include full time stamps in
-:command:`ls` and to make :command:`rm` default to prompting for confirmation:
+* include full time stamps in :command:`ls` and to make :command:`rm` default to prompting for confirmation:
 
 .. code-block:: console
 
@@ -439,28 +498,32 @@ Add the following line to :file:`/etc/fstab`:
 
 Add the following lines to :file:`/etc/exports`:
 
-.. code-block:: console
+.. code-block:: text
 
-    /export        192.168.238.0/24(rw,fsid=0,insecure,no_subtree_check,async)
-    /export/MEOPAR 192.168.238.0/24(rw,nohide,insecure,no_subtree_check,async)
+    /export        192.168.156.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+    /export/MEOPAR 192.168.156.0/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
-  .. code-block:: console
+.. code-block:: console
 
+    $ sudo systemctl daemon-reload
     $ sudo systemctl start nfs-kernel-server.service
 
 
 Compute Node Template
 ---------------------
 
-Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance` that you launched above with:
+Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance`
+that you launched above,
+and reboot the instance with:
 
 .. code-block:: console
 
     $ sudo apt update
     $ sudo apt upgrade
     $ sudo apt auto-remove
+    $ sudo shutdown -r now
 
 Set the timezone with:
 
@@ -471,44 +534,29 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the ``systemd-timesyncd.service`` is activate with:
+and that the NTP service is active with:
 
 .. code-block:: console
 
     $ timedatectl status
 
-Provision the :ref:`HeadNodeInstance` with the following packages:
+Provision the :ref:`ComputeNodeInstance` with the following packages:
 
 .. code-block:: console
 
     $ sudo apt update
-    $ sudo apt install -y gfortran
-    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y gfortran g++
+    $ sudo apt install -y libopenmpi-dev openmpi-bin
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
     $ sudo apt install -y mg
     $ sudo apt install -y nfs-common
 
-Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
-and export environment variables to enable wwatch3 to use netCDF4:
+Create :file:`$HOME/.bash_aliases` containing commands to include full time stamps in
+:command:`ls` and to make :command:`rm` default to prompting for confirmation:
 
 .. code-block:: console
 
-    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
-    fi
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
-    fi
-
-    # Enable wwatch3 to use netCDF4
-    export WWATCH3_NETCDF=NC4
-    export NETCDF_CONFIG=$(which nc-config)
-
-Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
-
-.. code-block:: console
-
+    alias lf="ls -ltr --full-time"
     alias rm="rm -i"
 
 Create the :file:`/nemoShare/` mount point,
@@ -520,15 +568,18 @@ and set the owner and group:
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
 
 From the head node,
-copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the compute node:
+copy the public key of the passphrase-less ssh key pair that will be used for
+MPI communications among the VMs into :file:`$HOME/.ssh/authorized_keys` on the compute node:
 
 .. code-block:: console
 
     # on nowcast0
-    $ ssh-copy-id -f -i $HOME/.ssh/id_rsa nowcast1
+    $ ssh-copy-id -f -i $HOME/.ssh/id_ed25519 nowcast1
 
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
-Use a name like ``nowcast-c16-60g-numa-compute-v0`` for the image.
+Use a name like ``compute-cb16-60gb-560-<ddmmmyy>`` for the image,
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``30jun26``.
 
 
 Hosts Mappings
@@ -536,53 +587,47 @@ Hosts Mappings
 
 Once all of the compute node VMs have been launched so that we know their IP addresses,
 create an :file:`.ssh/config` file,
-and MPI hosts mapping files for NEMO/WAVEWATCH VMs and FVCOM VMs on the head node.
+and MPI hosts mapping files on the head node for the NEMO/WAVEWATCH VMs.
 
 Head Node :file:`.ssh/config`
 -----------------------------
 
 .. code-block:: text
 
-    Host *
-       StrictHostKeyChecking no
+   Host *
+        StrictHostKeyChecking no
 
-    # Head node and XIOS host
-    Host nowcast0
-    HostName 192.168.238.14
+   # Head node and XIOS host
+   Host nowcast0
+     HostName 192.168.156.218
 
-    # NEMO compute nodes
-    Host nowcast1
-    HostName 192.168.238.10
-    Host nowcast2
-    HostName 192.168.238.13
-    Host nowcast3
-    HostName 192.168.238.8
-    Host nowcast4
-    HostName 192.168.238.16
-    Host nowcast5
-    HostName 192.168.238.5
-    Host nowcast6
-    HostName 192.168.238.6
-    Host nowcast7
-    HostName 192.168.238.18
-    Host nowcast8
-    HostName 192.168.238.15
+   # NEMO compute nodes
+   Host nowcast1
+     HostName 192.168.156.26
+   Host nowcast2
+     HostName 192.168.156.151
+   Host nowcast3
+     HostName 192.168.156.41
+   Host nowcast4
+     HostName 192.168.156.12
+   Host nowcast5
+     HostName 192.168.156.13
+   Host nowcast6
+     HostName 192.168.156.246
+   Host nowcast7
+     HostName 192.168.156.49
 
-    # FVCOM compute nodes
-    Host fvcom0
-    HostName 192.168.238.12
-    Host fvcom1
-    HostName 192.168.238.7
-    Host fvcom2
-    HostName 192.168.238.20
-    Host fvcom3
-    HostName 192.168.238.11
-    Host fvcom4
-    HostName 192.168.238.9
-    Host fvcom5
-    HostName 192.168.238.28
-    Host fvcom6
-    HostName 192.168.238.27
+   # wwatch3 compute nodes
+   Host wwatch1
+     HostName 192.168.156.93
+   Host wwatch2
+     HostName 192.168.156.69
+   Host wwatch3
+     HostName 192.168.156.55
+   Host wwatch4
+     HostName 192.168.156.91
+   Host wwatch5
+     HostName 192.168.156.167
 
 
 MPI Hosts Mappings
@@ -592,31 +637,28 @@ MPI Hosts Mappings
 
 .. code-block:: text
 
-    192.168.238.10 slots=15 max-slots=16
-    192.168.238.13 slots=15 max-slots=16
-    192.168.238.8  slots=15 max-slots=16
-    192.168.238.16 slots=15 max-slots=16
-    192.168.238.5  slots=15 max-slots=16
-    192.168.238.6  slots=15 max-slots=16
-    192.168.238.18 slots=15 max-slots=16
-    192.168.238.15 slots=15 max-slots=16
+   # compute nodes for NEMO processes
+   nowcast1 slots=15 max-slots=16
+   nowcast2 slots=15 max-slots=16
+   nowcast3 slots=15 max-slots=16
+   nowcast4 slots=15 max-slots=16
+   nowcast5 slots=15 max-slots=16
+   nowcast6 slots=15 max-slots=16
+   nowcast7 slots=15 max-slots=16
 
-:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for ``x2`` model configuration runs containing:
+   # head node for XIOS process (must be last)
+   nowcast0 slots=1 max-slots=16
 
-.. code-block:: text
-
-    192.168.238.12 slots=15 max-slots=16
-    192.168.238.7  slots=15 max-slots=16
-
-:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for ``r12`` model configuration runs containing:
+:file:`$HOME/mpi_hosts.wwatch3` for WAVEWATCH VMs:
 
 .. code-block:: text
 
-    192.168.238.20 slots=15 max-slots=16
-    192.168.238.11 slots=15 max-slots=16
-    192.168.238.9  slots=15 max-slots=16
-    192.168.238.28 slots=15 max-slots=16
-    192.168.238.27 slots=15 max-slots=16
+   # compute nodes
+   wwatch1 slots=15 max-slots=16
+   wwatch2 slots=15 max-slots=16
+   wwatch3 slots=15 max-slots=16
+   wwatch4 slots=15 max-slots=16
+   wwatch5 slots=15 max-slots=16
 
 
 Git Repositories
@@ -633,7 +675,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/SalishSeaWaves.git
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
     $ git clone git@github.com:SalishSeaCast/tides.git
-    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
@@ -655,7 +696,7 @@ Build XIOS-2 with:
 .. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2
-    $ ./make_xios --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 8
+    $ ./make_xios --full --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 12
 
 
 Build NEMO-3.6
@@ -666,8 +707,8 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 .. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
-    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast -j8
-    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast_Blue -j8
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast -j12
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast_Blue -j12
     $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
     $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./maketools -m GCC_ARBUTUS -n REBUILD_NEMO
 
@@ -721,6 +762,9 @@ and make :file:`comp.gnu` executable:
     $ ln -sf comp.gnu comp && chmod +x comp.gnu
     $ ln -sf link.gnu link
 
+Add the ``-fallow-argument-mismatch`` compiler flag to the ``opt`` string at line 85 of the :file:`comp` file.
+The is necessary to get the fairly old ``wwatch3-5.16`` code to compile with the GCC-13 compilers.
+
 Symlink the :file:`SalishSeaWaves/switch` file in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin`:
 
 .. code-block:: console
@@ -769,10 +813,33 @@ to :file:`~/.bashrc`.
 
 Start a new shell to apply the changes.
 
+Add a Pixi configuration setting to specify the storage location to use for the repository data cache.
+This setting eliminates the warning messages that otherwise appears when the ``repodata``
+cache is written to network-mounted storage.
+
+.. code-block:: console
+
+   pixi config set --global cache.repodata /tmp/pixi-cache-$USER/repodata
+
+Install the bat_,
+exa_,
+fd-find_
+and ripgrep_ utilities:
+
+.. code-block:: console
+
+   $ pixi global install bat eza fd-find ripgrep
+
+.. _bat: https://github.com/sharkdp/bat
+.. _exa: https://eza.rocks
+.. _fd-find: https://github.com/sharkdp/fd
+.. _ripgrep: https://github.com/burntsushi/ripgrep
+
 The Python packages that the system depends on are installed in ``default`` environment with:
 
 .. code-block:: console
 
+    $ cd /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/
     $ pixi install
 
 
@@ -804,8 +871,7 @@ Create a :file:`runs/` directory for the NEMO runs and populate it with:
     $ ln -s ../rivers-climatology
     $ ln -s ../tides
     $ ln -s ../tracers
-
-    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
 
 
 WaveWatch Runs Directories
@@ -849,7 +915,7 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current
 
-  The :program:`make_ww3_wind_file` worker:
+  The :program:`make_ww3_current_file` worker:
 
   * Uses files from the :file:`/nemoShare/MEOPAR/SalishSea/` NEMO results storage tree appropriate for the wwatch3 run date and type to produce a :file:`SoG_current_yyyymmdd.nc` file in the :file:`current/` directory
 
@@ -859,6 +925,32 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
   * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
   * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
+
+
+``cron`` Jobs
+=============
+
+Add ``cron`` jobs to remove old results and wwatch3 current and wind forcing files:
+
+.. code-block:: bash
+
+   $ export EDITOR=/usr/bin/mg
+   $ crontab -e
+
+``crontab`` contents:
+
+.. code-block:: text
+
+   # m h  dom mon dow   command
+    0 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 30d . /nemoShare/MEOPAR/SalishSea/nowcast/ -x rm -rf
+    5 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 30d . /nemoShare/MEOPAR/SalishSea/nowcast-green/ -x rm -rf
+   10 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 20d . /nemoShare/MEOPAR/SalishSea/forecast/ -x rm -rf
+   15 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/forecast2/ -x rm -rf
+   20 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/ -x rm -rf
+   25 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/ -x rm -rf
+   30 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type d --changed-before 15d . /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/ -x rm -rf
+   35 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type f --changed-before 15d . /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/ -x rm -f
+   40 0  *   *   *     /home/ubuntu/.pixi/bin/fd --type f --changed-before 15d . /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind/ -x rm -f
 
 
 Managing Compute Nodes
@@ -871,7 +963,7 @@ their hostnames can be set with:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {1..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"
@@ -881,18 +973,18 @@ Mount shared storage via NFS from head node:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {1..7}
     do
       echo nowcast${n}
       ssh nowcast${n} \
-        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.14:/MEOPAR /nemoShare/MEOPAR"
+        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.156.218:/MEOPAR /nemoShare/MEOPAR"
     done
 
 Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {0..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"
@@ -902,7 +994,7 @@ Confirm that :file:`/nemoShare/MEOPAR/` has the shared storage mounts:
 
 .. code-block:: console
 
-    for n in {1..8}
+    for n in {0..7}
     do
       echo nowcast${n}
       ssh nowcast${n} "ls -l /nemoShare/MEOPAR"

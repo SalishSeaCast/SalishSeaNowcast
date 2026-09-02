@@ -82,27 +82,26 @@ def config(base_config):
                   enabled hosts:
                     arbutus.cloud:
                       mpi hosts file: ${HOME}/mpi_hosts
-                      xios host: 192.168.238.14
                       run prep dir: nowcast-sys/runs/
                       grid dir: nowcast-sys/grid/
-                      salishsea_cmd: pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
+                      salishsea_cmd: /home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea
                       job exec cmd: bash
                       run types:
                         nowcast:
                           run sets dir: SS-run-sets/v201905/nowcast-blue/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/nowcast/
                         forecast:
                           run sets dir: SS-run-sets/v201905/forecast/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/forecast/
                         forecast2:
                           run sets dir: SS-run-sets/v201905/forecast2/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/forecast2/
                         nowcast-green:
                           run sets dir: SS-run-sets/v201905/nowcast-green/
-                          mpi decomposition: 11x18
+                          mpi decomposition: 10x17
                           results: results/SalishSea/nowcast-green/
                       forcing:
                         bottom friction mask: grid/jetty_mask_bathy201702.nc
@@ -392,7 +391,7 @@ class TestRunDescription:
         host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config = patch.dict(
             host_config["run types"]["nowcast"],
-            {"run sets dir": "foo", "mpi decomposition": "11x18"},
+            {"run sets dir": "foo", "mpi decomposition": "10x17"},
             clear=True,
         )
         caplog.set_level(logging.DEBUG)
@@ -469,10 +468,10 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "11x18"),
-            ("arbutus.cloud", "nowcast-green", "11x18"),
-            ("arbutus.cloud", "forecast", "11x18"),
-            ("arbutus.cloud", "forecast2", "11x18"),
+            ("arbutus.cloud", "nowcast", "10x17"),
+            ("arbutus.cloud", "nowcast-green", "10x17"),
+            ("arbutus.cloud", "forecast", "10x17"),
+            ("arbutus.cloud", "forecast2", "10x17"),
         ],
     )
     def test_mpi_decomposition(
@@ -1012,7 +1011,7 @@ class TestBuildScript:
     )
     @patch("nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc")
     @patch(
-        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=119
+        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=103
     )
     def test_script_arbutus_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -1022,7 +1021,7 @@ class TestBuildScript:
         p_config = patch.dict(config["results archive"], {run_type: str(results_dir)})
         m_lrd.return_value = {
             "run_id": "13may17nowcast",
-            "MPI decomposition": "11x18",
+            "MPI decomposition": "10x17",
             "output": {"XIOS servers": 1},
         }
         with p_config:
@@ -1040,9 +1039,9 @@ class TestBuildScript:
         RUN_DESC="13may17.yaml"
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
-        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
-        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
+        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
 
         mkdir -p ${{RESULTS_DIR}}
 
@@ -1050,8 +1049,7 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 119 --bind-to none ./nemo.exe : \
--host 192.168.238.14 -np 1 --bind-to none ./xios_server.exe \
+        ${{MPIRUN}} -np 1 ./xios_server.exe : -np 103 ./nemo.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -1106,9 +1104,9 @@ class TestDefinitions:
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
-        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
-        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
+        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
+        COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
         defns = defns.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
@@ -1136,9 +1134,9 @@ class TestDefinitions:
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
-        COMBINE="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
-        GATHER="pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
+        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
+        COMBINE="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea combine"
+        GATHER="/home/ubuntu/.pixi/bin/pixi run -m /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea gather"
         """
         defns = defns.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
@@ -1149,44 +1147,14 @@ class TestExecute:
     """Unit test for _execute() function."""
 
     def test_execute(self, config):
-        script = run_NEMO._execute(
-            nemo_processors=15, xios_processors=1, xios_host=None
-        )
+        script = run_NEMO._execute(nemo_processors=15, xios_processors=1)
         expected = """mkdir -p ${RESULTS_DIR}
 
         cd ${WORK_DIR}
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
--np 1 --bind-to none ./xios_server.exe \
->>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
-        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-
-        echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
-        ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
-        echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
-
-        echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
-        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
-        """
-        script = script.splitlines()
-        for i, line in enumerate(expected.splitlines()[:-1]):
-            assert script[i].strip() == line.strip()
-
-    def test_execute_with_xios_host(self, config):
-        script = run_NEMO._execute(
-            nemo_processors=15, xios_processors=1, xios_host="192.168.1.79"
-        )
-        expected = """mkdir -p ${RESULTS_DIR}
-
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
-
-        echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
--host 192.168.1.79 -np 1 --bind-to none ./xios_server.exe \
+        ${MPIRUN} -np 1 ./xios_server.exe : -np 15 ./nemo.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
