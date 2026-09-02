@@ -204,7 +204,7 @@ tomli==2.4.1
 tomli_w==1.2.0
 tomlkit==0.15.0
 toolz==1.1.0
-tornado==6.5.7
+tornado==6.5.8
 tqdm==4.68.4
 trove-classifiers==2026.6.1.19
 truststore==0.10.4
