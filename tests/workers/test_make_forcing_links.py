@@ -143,7 +143,6 @@ class TestConfig:
         assert list(prod_config["run"]["enabled hosts"].keys()) == [
             "arbutus.cloud-nowcast",
             "salish-nowcast",
-            "orcinus-nowcast-agrif",
             "robot.nibi",
             "optimum-hindcast",
         ]
@@ -152,7 +151,6 @@ class TestConfig:
         "host, ssh_key",
         (
             ("arbutus.cloud-nowcast", "SalishSeaCast-automation_ed25519"),
-            ("orcinus-nowcast-agrif", "SalishSeaNEMO-nowcast_id_rsa"),
             ("robot.nibi", "SalishSeaCast_robot.nibi_ed25519"),
             ("optimum-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
         ),
@@ -162,10 +160,7 @@ class TestConfig:
 
     @pytest.mark.parametrize(
         "host, run_prep_dir",
-        (
-            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/nowcast-sys/runs"),
-            ("orcinus-nowcast-agrif", "/global/home/dlatorne/nowcast-agrif-sys/runs"),
-        ),
+        (("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/nowcast-sys/runs"),),
     )
     def test_run_prep_dir(self, host, run_prep_dir, prod_config):
         assert prod_config["run"]["enabled hosts"][host]["run prep dir"] == run_prep_dir
@@ -177,7 +172,6 @@ class TestConfig:
         "host, ssh_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/sshNeahBay/"),
             (
                 "optimum-hindcast",
@@ -200,7 +194,6 @@ class TestConfig:
         "host, rivers_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
         ),
@@ -215,7 +208,6 @@ class TestConfig:
         "host, fraser_turbidity_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
                 "robot.nibi",
                 "/project/rrg-allen/SalishSea/forcing/rivers/river_turb/",
@@ -246,10 +238,6 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             (
-                "orcinus-nowcast-agrif",
-                "/global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/",
-            ),
-            (
                 "robot.nibi",
                 "/project/rrg-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
@@ -275,7 +263,6 @@ class TestConfig:
         "host, bc_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/LiveOcean/"),
             (
                 "optimum-hindcast",
