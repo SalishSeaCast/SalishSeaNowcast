@@ -136,7 +136,6 @@ class TestConfig:
         assert enabled_hosts == [
             "arbutus.cloud-nowcast",
             "salish-nowcast",
-            "orcinus-nowcast-agrif",
             "robot.nibi",
             "optimum-hindcast",
         ]
@@ -165,7 +164,6 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
@@ -182,7 +180,6 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
             ),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
                 "robot.nibi",
                 "/project/rrg-allen/SalishSea/forcing/rivers/river_turb/",
@@ -201,7 +198,6 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/rivers/"),
         ),
     )
@@ -222,10 +218,6 @@ class TestConfig:
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
-            ),
-            (
-                "orcinus-nowcast-agrif",
-                "/global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/",
             ),
             (
                 "robot.nibi",
@@ -251,7 +243,6 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
-            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
             ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )

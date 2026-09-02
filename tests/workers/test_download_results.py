@@ -172,7 +172,6 @@ class TestConfig:
         assert list(prod_config["run"]["enabled hosts"].keys()) == [
             "arbutus.cloud-nowcast",
             "salish-nowcast",
-            "orcinus-nowcast-agrif",
             "robot.nibi",
             "optimum-hindcast",
         ]
@@ -184,7 +183,6 @@ class TestConfig:
                 "arbutus.cloud-nowcast",
                 ["nowcast", "forecast", "forecast2", "nowcast-green"],
             ),
-            ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
             ("robot.nibi", []),
             ("optimum-hindcast", []),
         ),
@@ -218,12 +216,6 @@ class TestConfig:
                 "arbutus.cloud-nowcast",
                 "nowcast-green",
                 "/nemoShare/MEOPAR/SalishSea/nowcast-green/",
-            ),
-            (
-                "enabled hosts",
-                "orcinus-nowcast-agrif",
-                "nowcast-agrif",
-                "/global/scratch/dlatorne/nowcast-agrif/",
             ),
             (
                 "hindcast hosts",

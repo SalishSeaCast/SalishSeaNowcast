@@ -104,27 +104,32 @@ class TestConfig:
             "crash",
         ]
 
+    @pytest.mark.skip(reason="there is no host presently configured to run NEMO AGRIF")
     def test_enabled_hosts(self, prod_config):
         assert "orcinus-nowcast-agrif" in prod_config["run"]["enabled hosts"]
 
+    @pytest.mark.skip(reason="there is no host presently configured to run NEMO AGRIF")
     def test_ssh_key(self, prod_config):
         assert (
             prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["ssh key"]
             == "SalishSeaNEMO-nowcast_id_rsa"
         )
 
+    @pytest.mark.skip(reason="there is no host presently configured to run NEMO AGRIF")
     def test_scratch_dir(self, prod_config):
         assert (
             prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["scratch dir"]
             == "/global/scratch/dlatorne/nowcast-agrif"
         )
 
+    @pytest.mark.skip(reason="there is no host presently configured to run NEMO AGRIF")
     def test_run_prep_dir(self, prod_config):
         assert (
             prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["run prep dir"]
             == "/global/home/dlatorne/nowcast-agrif-sys/runs"
         )
 
+    @pytest.mark.skip(reason="there is no host presently configured to run NEMO AGRIF")
     def test_salishsea_cmd(self, prod_config):
         assert (
             prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"][
