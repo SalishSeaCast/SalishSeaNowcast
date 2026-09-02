@@ -106,9 +106,7 @@ The setup on ``optimum`` is described in:
 
    optimum
 
-See also the `#optimum-cluster`_ Slack channel.
-
-.. _#optimum-cluster: https://salishseacast.slack.com/?redir=%2Farchives%2FC011S7BCWGK
+See also the EOAS Slack ``#optimum-cluster`` channel.
 
 With the update of the production to run the V21-11 model version in January 2024,
 we decided to end the daily ``nowcast-dev`` development model runs on ``salish``.
