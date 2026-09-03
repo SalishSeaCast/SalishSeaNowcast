@@ -39,7 +39,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    # see requirements.txt for package versions used during recent development
     "angles>=2.0,<3",
     "arrow",
     "beautifulsoup4",
@@ -253,7 +252,6 @@ pandas-stubs = "2.3.3.*"
 
 [tool.pixi.feature.dev.tasks]
 pytest = "pytest -n6 --randomly-seed=last"
-update-reqs = "python -m pip list --format=freeze >> requirements.txt"
 
 [tool.pixi.feature.fig-dev.dependencies]
 jupyterlab = ">=4.6.1,<5"
