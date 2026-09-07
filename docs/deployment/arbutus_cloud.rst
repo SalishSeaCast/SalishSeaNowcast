@@ -669,6 +669,12 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: console
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ git clone git@github.com:UBC-MOAD/moad_tools.git
+    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
+    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
+    $ git clone git@github.com:UBC-MOAD/Reshapr.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/grid.git
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
@@ -679,6 +685,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
     $ git clone git@github.com:SalishSeaCast/XIOS-2.git
+
 
 Build XIOS-2
 ============

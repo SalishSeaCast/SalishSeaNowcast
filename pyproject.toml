@@ -73,12 +73,10 @@ dependencies = [
     "pandas",
     "paramiko",
     "pillow",
-    # "poppler",  # pip doesn't see poppler pkg installed by conda to provide pdftocairo
     "pygrib",
     "pypdf",
     "python-hglib>=2.6.2,<3",
     "pyyaml",
-    "reshapr @ git+https://github.com/UBC-MOAD/Reshapr.git",
     "retrying",
     "rich",
     "salishseacmd @ git+https://github.com/SalishSeaCast/SalishSeaCmd.git",

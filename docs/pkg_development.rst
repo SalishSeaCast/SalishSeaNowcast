@@ -100,13 +100,47 @@ Getting the Code
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast
     :alt: Git on GitHub
 
+Create a directory to contain the code repository clones.
+It can be named anything.
+Here we will call it :file:`SalishSeaCast/`.
+
+.. code-block:: console
+
+   $ mkdir SalishSeaCast
+
 Clone the code and documentation `repository`_ from GitHub with:
 
 .. _repository: https://github.com/SalishSeaCast/SalishSeaNowcast
 
 .. code-block:: console
 
-    $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
+   $ cd SalishSeaCast/
+   $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
+
+:py:obj:`SalishSeaNowcast` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
+
+* `NEMO_Nowcast`_
+* `moad_tools`_
+* `Reshapr`_
+* :ref:`SalishSeaToolsPackage`
+* `NEMO-Cmd`_
+* :ref:`SalishSeaCmdProcessor`
+
+.. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
+.. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
+.. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
+
+Clone those repositories into the :file:`SalishSeaCast/` directory:
+
+.. code-block:: console
+
+   $ cd SalishSeaCast/
+   $ git clone git@github.com:43ravens/NEMO_Nowcast.git
+   $ git clone git@github.com:UBC-MOAD/moad_tools.git
+   $ git clone git@github.com:UBC-MOAD/Reshapr.git
+   $ git clone git@github.com:SalishSeaCast/tools.git
+   $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
+   $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
 
 .. _SalishSeaNowcastDevelopmentEnvironment:
@@ -125,12 +159,28 @@ please follow its `installation instructions`_ to do so.
 .. _Pixi: https://pixi.prefix.dev/latest/
 .. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-Use :command:`pixi install` command to download the package dependencies and link them into environments.
+Use :command:`pixi install` command to download the package dependencies and link them into the ``dev`` environment:
+
+.. code-block:: console
+
+   $ cd SalishSeaCast/SalishSeaNowcast/
+   $ pixi install -e dev
+
+The install step includes installing :py:obj:`SalishSeaNowcast` in `editable install mode`_
+in the ``dev`` environment that `Pixi`_ creates.
+That means that changes you make to the code are immediately reflected in the environment.
+The other packages that you cloned above are also installed in editable mode.
+That means that any changes you make in their code are also immediately reflects.
+Furthermore,
+changes from other people that have been pushed to GitHub can be incorporated in your ``dev`` environment
+simply by doing a :command:`git pull`.
+
+.. _editable install mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
 
 Most commands are executed using :command:`pixi run` in the :file:`SalishSeaNowcast/` directory
 (or a sub-directory).
 
-* The ``default`` environment has the packages installed that are required to run the
+* The ``dev`` environment has the packages installed that are required to run the
   modules that have a command-line interface;
   e.g. :command:`pixi run python -m nowcast.workers.collect_weather --help`
 
@@ -151,32 +201,11 @@ That is convenient if you are running a lot of commands because it removed the n
 :command:`pixi run -e dev` before each of them.
 Use :command:`exit` to leave the sub-shell.
 
-:py:obj:`SalishSeaNowcast` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
-
-* `NEMO_Nowcast`_
-* `moad_tools`_
-* `Reshapr`_
-* :ref:`SalishSeaToolsPackage`
-* `NEMO-Cmd`_
-* :ref:`SalishSeaCmdProcessor`
-
-.. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
-.. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
-.. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
-
-Those packages are installed by the :command:`pixi install` command.
-
 To get detailed information about the environments,
 the packages installed in them,
 `Pixi`_ tasks that are defined for them,
 etc.,
 use :command:`pixi info`.
-
-:py:obj:`SalishSeaNowcast` is installed in `editable install mode`_ in all of the environments that
-`Pixi`_ creates.
-That means that changes you make to the code are immediately reflected in the environments.
-
-.. _editable install mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
 
 
 .. _SalishSeaNowcastCodingStyle:

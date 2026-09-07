@@ -30,6 +30,12 @@ Clone the following repos into :file:`/SalishSeaCast/`:
 .. code-block:: console
 
     $ cd /SalishSeaCast/
+    $ git clone git@github.com:UBC-MOAD/moad_tools.git
+    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
+    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
+    $ git clone git@github.com:UBC-MOAD/Reshapr.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/grid.git
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
