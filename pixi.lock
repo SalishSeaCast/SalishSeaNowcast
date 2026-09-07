@@ -364,12 +364,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -661,12 +662,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   dev:
@@ -1097,12 +1099,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -1470,12 +1473,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -1850,12 +1854,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -2167,12 +2172,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -2681,13 +2687,14 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zope.deprecation-4.4.0-py_0.tar.bz2
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
       - pypi: git+https://github.com/SalishSeaCast/salishsea-site.git#dd9c9db8c81224f6f05b938b0023e9887c642245
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -3132,13 +3139,14 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zope.interface-8.6-py314h17af80e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
       - pypi: git+https://github.com/SalishSeaCast/salishsea-site.git#dd9c9db8c81224f6f05b938b0023e9887c642245
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -3573,7 +3581,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.68.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-84.0.0-pyh332efcf_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-81.0.0-pyh332efcf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/six-1.17.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/smmap-5.0.3-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sniffio-1.3.1-pyhd8ed1ab_2.conda
@@ -3599,12 +3607,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -3708,7 +3717,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/schedule-1.2.2-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scour-0.38.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sentry-sdk-2.68.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-84.0.0-pyh332efcf_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-81.0.0-pyh332efcf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/six-1.17.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/smmap-5.0.3-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sniffio-1.3.1-pyhd8ed1ab_2.conda
@@ -3906,12 +3915,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   test-py314:
@@ -4276,12 +4286,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -4583,12 +4594,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
+      - pypi: ../NEMO-Cmd
+      - pypi: ../NEMO_Nowcast
+      - pypi: ../Reshapr
+      - pypi: ../SalishSeaCmd
+      - pypi: ../moad_tools
+      - pypi: ../tools/SalishSeaTools
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
 packages:
@@ -16042,6 +16054,98 @@ packages:
     - zstd >=1.5.7,<1.6.0a0
   size: 528228
   timestamp: 1786599702092
+- pypi: ../NEMO-Cmd
+  name: nemo-cmd
+  requires_dist:
+  - arrow
+  - attrs
+  - cliff
+  - f90nml
+  - gitpython
+  - python-hglib
+  - pyyaml
+  requires_python: '>=3.12'
+- pypi: ../NEMO_Nowcast
+  name: nemo-nowcast
+  requires_dist:
+  - arrow
+  - attrs
+  - pyyaml
+  - pyzmq
+  - requests
+  - schedule
+  - sentry-sdk
+  - supervisor
+  - sphinx ; extra == 'docs'
+  - coverage ; extra == 'test'
+  - pytest ; extra == 'test'
+  requires_python: '>=3.12'
+- pypi: ../Reshapr
+  name: reshapr
+  requires_dist:
+  - arrow
+  - bottleneck
+  - click
+  - dask
+  - flox
+  - h5netcdf
+  - netcdf4
+  - pyyaml
+  - rich
+  - structlog
+  - xarray
+  requires_python: '>=3.12'
+- pypi: ../SalishSeaCmd
+  name: salishseacmd
+  requires_dist:
+  - arrow
+  - attrs
+  - cliff
+  - f90nml
+  - gitpython
+  - python-hglib
+  - pyyaml
+  requires_python: '>=3.12'
+- pypi: ../moad_tools
+  name: moad-tools
+  requires_dist:
+  - arrow
+  - click
+  - matplotlib
+  - netcdf4
+  - numpy
+  - pandas
+  - pyyaml
+  - scipy
+  - xarray
+  - geopandas>=1.1.3,<2 ; extra == 'midoss'
+  - rasterio>=1.5.0,<2 ; extra == 'midoss'
+  - shapely>=2.1.2,<3 ; extra == 'midoss'
+  - tables>=3.11.1,<4 ; extra == 'midoss'
+  requires_python: '>=3.12'
+- pypi: ../tools/SalishSeaTools
+  name: salishseatools
+  requires_dist:
+  - angles
+  - arrow
+  - bottleneck
+  - cmocean
+  - erddapy
+  - f90nml
+  - gsw
+  - matplotlib
+  - netcdf4
+  - numpy
+  - openpyxl
+  - pandas
+  - python-dateutil
+  - pytz
+  - requests
+  - retrying
+  - scipy
+  - tqdm
+  - xarray
+  requires_python: '>=3.11'
 - pypi: ./
   name: salishseanowcast
   requires_dist:
@@ -16068,10 +16172,7 @@ packages:
   - lxml
   - mako
   - matplotlib
-  - moad-tools @ git+https://github.com/UBC-MOAD/moad_tools.git
   - nc-time-axis
-  - nemo-cmd @ git+https://github.com/SalishSeaCast/NEMO-Cmd.git
-  - nemo-nowcast @ git+https://github.com/43ravens/NEMO_Nowcast.git
   - netcdf4
   - numpy
   - numpy-indexed
@@ -16085,8 +16186,6 @@ packages:
   - pyyaml
   - retrying
   - rich
-  - salishseacmd @ git+https://github.com/SalishSeaCast/SalishSeaCmd.git
-  - salishseatools @ git+https://github.com/SalishSeaCast/tools.git#subdirectory=SalishSeaTools
   - scipy
   - scour
   - sentry-sdk
@@ -16098,46 +16197,6 @@ packages:
   - watchdog
   - xarray
   requires_python: '>=3.14'
-- pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
-  name: nemo-nowcast
-  version: 26.2.dev0
-  requires_dist:
-  - arrow
-  - attrs
-  - pyyaml
-  - pyzmq
-  - requests
-  - schedule
-  - sentry-sdk
-  - supervisor
-  - sphinx ; extra == 'docs'
-  - coverage ; extra == 'test'
-  - pytest ; extra == 'test'
-  requires_python: '>=3.12'
-- pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
-  name: nemo-cmd
-  version: 26.2.dev0
-  requires_dist:
-  - arrow
-  - attrs
-  - cliff
-  - f90nml
-  - gitpython
-  - python-hglib
-  - pyyaml
-  requires_python: '>=3.12'
-- pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-  name: salishseacmd
-  version: 26.2.dev0
-  requires_dist:
-  - arrow
-  - attrs
-  - cliff
-  - f90nml
-  - gitpython
-  - python-hglib
-  - pyyaml
-  requires_python: '>=3.12'
 - pypi: git+https://github.com/SalishSeaCast/salishsea-site.git#dd9c9db8c81224f6f05b938b0023e9887c642245
   name: salishsea-site
   version: 25.3.dev0
@@ -16152,48 +16211,6 @@ packages:
   - supervisor
   - waitress
   requires_python: '>=3.13'
-- pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
-  name: salishseatools
-  version: 25.1.dev0
-  requires_dist:
-  - angles
-  - arrow
-  - bottleneck
-  - cmocean
-  - erddapy
-  - f90nml
-  - gsw
-  - matplotlib
-  - netcdf4
-  - numpy
-  - openpyxl
-  - pandas
-  - python-dateutil
-  - pytz
-  - requests
-  - retrying
-  - scipy
-  - tqdm
-  - xarray
-  requires_python: '>=3.11'
-- pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
-  name: moad-tools
-  version: 26.2.dev0
-  requires_dist:
-  - arrow
-  - click
-  - matplotlib
-  - netcdf4
-  - numpy
-  - pandas
-  - pyyaml
-  - scipy
-  - xarray
-  - geopandas>=1.1.3,<2 ; extra == 'midoss'
-  - rasterio>=1.5.0,<2 ; extra == 'midoss'
-  - shapely>=2.1.2,<3 ; extra == 'midoss'
-  - tables>=3.11.1,<4 ; extra == 'midoss'
-  requires_python: '>=3.12'
 - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
   name: angles
   version: '2.0'
