@@ -203,15 +203,40 @@ docs = { features = ["docs"], no-default-feature = true }
 fig-dev = { features = ["fig-dev", "dev"], solve-group = "dev" }
 sarracenia = { features = ["sarracenia"], no-default-feature = true }
 test = { features = ["test"], solve-group = "dev" }
-test-py314 = ["py314", "test"]
+test-py314 = { features = ["py314"], no-default-feature = true }
 
 [tool.pixi.feature.test.tasks]
 pytest = "pytest"
 pytest-cov = "pytest --cov=./"
 pytest-cov-html = "pytest --cov=./ --cov-report html"
 
+[tool.pixi.feature.py314.tasks]
+pytest = "pytest"
+
 [tool.pixi.feature.py314.dependencies]
+# Python version to test with
 python = "3.14.*"
+# SalishSeaNowcast package dependencies
+attrs = ">=26.1.0,<27"
+coloredlogs = ">=15.0.1,<16"
+dask = ">=2026.7.0,<2027"
+structlog = ">=26.1.0,<27"
+verboselogs = ">=1.7,<2"
+# Testing packages
+pytest = ">=9.1.1,<10"
+pytest-cov = ">=7.1.0,<8"
+pytest-httpx = ">=0.36.2,<0.37"
+pytest-randomly = ">=3.15.0,<4"
+tomli = ">=2.4.1,<3"
+
+[tool.pixi.feature.py314.pypi-dependencies]
+moad-tools = { git = "https://github.com/UBC-MOAD/moad_tools.git" }
+reshapr = { git = "https://github.com/UBC-MOAD/Reshapr.git" }
+salishseatools = { git = "https://github.com/SalishSeaCast/tools.git", subdirectory = "SalishSeaTools" }
+nemo-cmd = { git = "https://github.com/SalishSeaCast/NEMO-Cmd.git" }
+salishseacmd = { git = "https://github.com/SalishSeaCast/SalishSeaCmd.git" }
+nemo-nowcast = { git = "https://github.com/43ravens/NEMO_Nowcast.git" }
+salishseanowcast = { path = "./", editable = true }
 
 [tool.pixi.feature.docs.tasks]
 docs = { cmd = "make clean html", cwd = "docs/" }
@@ -229,8 +254,8 @@ pillow = "12.2.0.*"
 pytz = ">=2026.3.post1,<2027"
 
 [tool.pixi.feature.docs.pypi-dependencies]
-salishseanowcast = { path = "./", editable = true }
 nemo-nowcast = { git = "https://github.com/43ravens/NEMO_Nowcast.git" }
+salishseanowcast = { path = "./", editable = true }
 
 [tool.pixi.feature.dev.dependencies]
 black = ">=26.5.1,<27"
@@ -302,9 +327,6 @@ SARRACENIA_CONFIG="/SalishSeaCast/SalishSeaNowcast/sarracenia"
 
 [dependency-groups]
 dev = ["sphinx-rtd-theme==3.1.0"]
-docs = [
-    "sphinx-rtd-theme==3.1.0",
-#    "nemo-nowcast @ git+https://github.com/43ravens/NEMO_Nowcast.git"
-]
+docs = ["sphinx-rtd-theme==3.1.0"]
 fig-dev = ["salishsea_site @ git+https://github.com/SalishSeaCast/salishsea-site.git"]
 sarracenia = ["metpx-sarracenia==2.22.10.post2"]
