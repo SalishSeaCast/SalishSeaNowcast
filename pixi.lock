@@ -1569,6 +1569,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/urllib3-2.7.0-pyhd8ed1ab_0.conda
       - pypi: ./
       - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#785c5aa6b666688e75990bd15e85853c08437c1b
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/89/dbeab77a217f8fbda97a637acf1e3f0ce8c9c9fb3f5e5d1ff843da859520/nc_time_axis-1.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
@@ -1738,6 +1743,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
       - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#ba7b417a175a46ac3ddd590faf1332bf3a6d7f28
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#d71954b6729eaf143855e7bea94d1f9fec4cb8ef
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#9a799fb59527127d08e2c94af2bda642bab409ba
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#785c5aa6b666688e75990bd15e85853c08437c1b
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#525d52e6a47f23ecdbd13ec59b5b35d14cb5a118
       - pypi: https://files.pythonhosted.org/packages/01/89/dbeab77a217f8fbda97a637acf1e3f0ce8c9c9fb3f5e5d1ff843da859520/nc_time_axis-1.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl

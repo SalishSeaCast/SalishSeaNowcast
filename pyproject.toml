@@ -254,6 +254,11 @@ pillow = "12.2.0.*"
 pytz = ">=2026.3.post1,<2027"
 
 [tool.pixi.feature.docs.pypi-dependencies]
+moad-tools = { git = "https://github.com/UBC-MOAD/moad_tools.git" }
+salishseatools = { git = "https://github.com/SalishSeaCast/tools.git", subdirectory = "SalishSeaTools" }
+reshapr = { git = "https://github.com/UBC-MOAD/Reshapr.git" }
+nemo-cmd = { git = "https://github.com/SalishSeaCast/NEMO-Cmd.git" }
+salishseacmd = { git = "https://github.com/SalishSeaCast/SalishSeaCmd.git" }
 nemo-nowcast = { git = "https://github.com/43ravens/NEMO_Nowcast.git" }
 salishseanowcast = { path = "./", editable = true }
 
