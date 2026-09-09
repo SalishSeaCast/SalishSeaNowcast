@@ -199,7 +199,7 @@ tomli = ">=2.4.1,<3"
 
 [tool.pixi.environments]
 dev = { features = ["dev"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
+docs = { features = ["docs"], no-default-feature = true }
 fig-dev = { features = ["fig-dev", "dev"], solve-group = "dev" }
 sarracenia = { features = ["sarracenia"], no-default-feature = true }
 test = { features = ["test"], solve-group = "dev" }
@@ -226,6 +226,11 @@ commonmark = "0.9.1.*"
 recommonmark = "0.7.1.*"
 mock = "5.2.0.*"
 pillow = "12.2.0.*"
+pytz = ">=2026.3.post1,<2027"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+salishseanowcast = { path = "./", editable = true }
+nemo-nowcast = { git = "https://github.com/43ravens/NEMO_Nowcast.git" }
 
 [tool.pixi.feature.dev.dependencies]
 black = ">=26.5.1,<27"
@@ -297,6 +302,9 @@ SARRACENIA_CONFIG="/SalishSeaCast/SalishSeaNowcast/sarracenia"
 
 [dependency-groups]
 dev = ["sphinx-rtd-theme==3.1.0"]
-docs = ["sphinx-rtd-theme==3.1.0"]
+docs = [
+    "sphinx-rtd-theme==3.1.0",
+#    "nemo-nowcast @ git+https://github.com/43ravens/NEMO_Nowcast.git"
+]
 fig-dev = ["salishsea_site @ git+https://github.com/SalishSeaCast/salishsea-site.git"]
 sarracenia = ["metpx-sarracenia==2.22.10.post2"]
