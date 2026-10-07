@@ -16,7 +16,7 @@ repos:
       - id: check-added-large-files
   # Code formatting with black
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.5.1
+    rev: 26.10.0
     hooks:
       - id: black
         arg: --target-version=py314
