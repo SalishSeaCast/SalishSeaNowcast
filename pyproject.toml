@@ -231,7 +231,7 @@ pillow = "12.2.0.*"
 [tool.pixi.feature.dev.dependencies]
 black = ">=26.5.1,<27"
 hatch = ">=1.17.0,<2"
-pip = ">=26.1.2,<27"
+pip = ">=26.2.2,<27"
 pre-commit = ">=4.6.0,<5"
 pytest = ">=9.1.1,<10"
 pytest-cov = ">=7.1.0,<8"
