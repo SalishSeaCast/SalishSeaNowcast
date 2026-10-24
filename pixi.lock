@@ -258,10 +258,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -317,7 +317,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.53-pyha770c72_0.conda
@@ -365,12 +365,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -382,10 +382,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -441,7 +441,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.53-pyha770c72_0.conda
@@ -662,12 +662,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   dev:
@@ -925,10 +925,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/black-26.5.1-pyh866005b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgv-3.5.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
@@ -1017,7 +1017,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.12.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
@@ -1100,12 +1100,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -1124,10 +1124,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/black-26.5.1-pyh866005b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgv-3.5.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
@@ -1215,7 +1215,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.12.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
@@ -1474,12 +1474,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -1732,10 +1732,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -1795,7 +1795,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.53-pyha770c72_0.conda
@@ -1855,12 +1855,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -1876,10 +1876,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -1939,7 +1939,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.53-pyha770c72_0.conda
@@ -2172,12 +2172,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -2446,10 +2446,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.4.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.4.0-hac0b51c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgv-3.5.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
@@ -2576,7 +2576,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/plaster-1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/plaster_pastedeploy-0.7-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.12.2-pyh5ded981_0.conda
@@ -2688,13 +2688,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zope.deprecation-4.4.0-py_0.tar.bz2
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
       - pypi: git+https://github.com/SalishSeaCast/salishsea-site.git#3517ec88261560db3d3ca2b9b1586e8bdf133f8a
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -2719,10 +2719,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.4.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.4.0-hac0b51c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgv-3.5.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
@@ -2848,7 +2848,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-1.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/plaster-1.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/plaster_pastedeploy-0.7-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.12.2-pyh5ded981_0.conda
@@ -3140,13 +3140,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zope.interface-8.6-py314h17af80e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
       - pypi: git+https://github.com/SalishSeaCast/salishsea-site.git#3517ec88261560db3d3ca2b9b1586e8bdf133f8a
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
@@ -3195,7 +3195,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/amqp-5.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/appdirs-1.4.4-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.11.16-py311hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/humanfriendly-10.0-pyh707e725_8.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/humanize-4.16.0-pyhd8ed1ab_0.conda
@@ -3213,7 +3213,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/amqp-5.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/appdirs-1.4.4-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.11.16-py311hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/humanfriendly-10.0-pyh707e725_8.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/humanize-4.16.0-pyhd8ed1ab_0.conda
@@ -3498,10 +3498,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -3560,7 +3560,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
@@ -3614,12 +3614,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -3631,10 +3631,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -3693,7 +3693,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
@@ -3921,12 +3921,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   test-py314:
@@ -4176,10 +4176,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -4238,7 +4238,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
@@ -4292,12 +4292,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zict-3.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
@@ -4309,10 +4309,10 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.zstd-1.7.0-py314h680f03e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.15.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bokeh-3.10.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-2.0.1-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.5.0-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cliff-4.16.0-pyhd8ed1ab_0.conda
@@ -4371,7 +4371,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/paramiko-4.0.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.1.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/poppler-data-0.4.12-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.18.0-pyhd8ed1ab_0.conda
@@ -4599,12 +4599,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - pypi: ./
-      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
-      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
-      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
-      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
-      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
-      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+      - pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
+      - pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
+      - pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
+      - pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
+      - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
+      - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
 packages:
@@ -5186,7 +5186,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/cffi?source=compressed-mapping
+  - pkg:pypi/cffi?source=hash-mapping
   run_exports: {}
   size: 310350
   timestamp: 1788485287159
@@ -5203,7 +5203,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/cffi?source=compressed-mapping
+  - pkg:pypi/cffi?source=hash-mapping
   run_exports: {}
   size: 307262
   timestamp: 1788485305536
@@ -5577,7 +5577,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/h5py?source=compressed-mapping
+  - pkg:pypi/h5py?source=hash-mapping
   run_exports: {}
   size: 1356242
   timestamp: 1787108756172
@@ -9262,20 +9262,20 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/bokeh?source=compressed-mapping
+  - pkg:pypi/bokeh?source=hash-mapping
   run_exports: {}
   size: 4454345
   timestamp: 1787144786949
-- conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
-  sha256: 0a0544cf95f64394fe4959286f5c71f5444ad58feb0602e53becb27448d24da6
-  md5: 0f51e2391ade309db462a55611263e9c
+- conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.23-hbd8a1cb_0.conda
+  sha256: 95619b9c1184be7175392eeb0ee7eeb5ccf25d280951f4225f2d62e725790be3
+  md5: 3fd02989038a1e1cee627c14c2d73f29
   depends:
   - __unix
   license: ISC
   purls: []
   run_exports: {}
-  size: 131780
-  timestamp: 1784754889428
+  size: 130057
+  timestamp: 1792772446739
 - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-2.0.1-pyhcf101f3_0.conda
   sha256: 39358005c3cc44d8315ed79789b18a960d69365be979970cc6bae8f7a6177703
   md5: 70e764e549c6c25de5e429d6e4a28b39
@@ -9283,8 +9283,7 @@ packages:
   - cached_property >=2.0.1,<2.0.2.0a0
   license: BSD-3-Clause
   license_family: BSD
-  purls:
-  - pkg:pypi/cached-property?source=compressed-mapping
+  purls: []
   run_exports: {}
   size: 3720
   timestamp: 1787678456483
@@ -9297,21 +9296,21 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/cached-property?source=compressed-mapping
+  - pkg:pypi/cached-property?source=hash-mapping
   run_exports: {}
   size: 16597
   timestamp: 1787678456483
-- conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
-  sha256: fb167de4388e64e52aa3907ed099afab944c1fa6e5f74b281a312dae1bcf7f3b
-  md5: 37e13edbe3b48f1095a9d085ef9cd83b
+- conda: https://conda.anaconda.org/conda-forge/noarch/certifi-2026.10.23-pyhd8ed1ab_0.conda
+  sha256: 04e641ccaa58278b431e97f2a43090bafc676436d04b5860dfd9b18166f2b326
+  md5: 484e26532435808425148c83bf58aa0b
   depends:
-  - python >=3.10
+  - python >=3.11
   license: ISC
   purls:
-  - pkg:pypi/certifi?source=hash-mapping
+  - pkg:pypi/certifi?source=compressed-mapping
   run_exports: {}
-  size: 137015
-  timestamp: 1784717699092
+  size: 135537
+  timestamp: 1792764012327
 - conda: https://conda.anaconda.org/conda-forge/noarch/cfgrib-0.9.15.1-pyh5ded981_0.conda
   sha256: 95acee8c59c05fe7feb30aa320bfd3d49df433bf5a8735a4eac833b950724929
   md5: d99ba65a7abd916c7af66790c6543716
@@ -9540,7 +9539,8 @@ packages:
   - openssl !=1.1.1e
   license: BSD-3-Clause
   license_family: BSD
-  purls: []
+  purls:
+  - pkg:pypi/dask?source=compressed-mapping
   run_exports: {}
   size: 10415
   timestamp: 1787917206356
@@ -9561,7 +9561,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/dask?source=hash-mapping
+  - pkg:pypi/dask?source=compressed-mapping
   run_exports: {}
   size: 1071072
   timestamp: 1787845029550
@@ -10198,7 +10198,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/imagesize?source=compressed-mapping
+  - pkg:pypi/imagesize?source=hash-mapping
   run_exports: {}
   size: 21467
   timestamp: 1787649248672
@@ -10575,7 +10575,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/jupyter-client?source=compressed-mapping
+  - pkg:pypi/jupyter-client?source=hash-mapping
   run_exports: {}
   size: 118962
   timestamp: 1787929615607
@@ -11281,18 +11281,18 @@ packages:
   run_exports: {}
   size: 53561
   timestamp: 1733302019362
-- conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda
-  sha256: 0f7021cfb3ff454c91a5e28e1f5060906a52c6d1cde3f879a7d03ac33c28b1c3
-  md5: 573cb3ed111004230ed3de650653cd4d
+- conda: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh145f28c_0.conda
+  sha256: 5edc68a9d14102ba90d5d41e871163a90c6fa0a60b10fc8b66e44c99b92ae9ae
+  md5: 39d4f1dfe506a870f6be9047f0b31246
   depends:
   - python >=3.13.0a0
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/pip?source=hash-mapping
+  - pkg:pypi/pip?source=compressed-mapping
   run_exports: {}
-  size: 1198163
-  timestamp: 1785914482439
+  size: 1199840
+  timestamp: 1792524294936
 - conda: https://conda.anaconda.org/conda-forge/noarch/plaster-1.0-pyhd8ed1ab_1.conda
   sha256: 5ce4768d4813734fdfd35e08ac95a2d555fcefb263390053dda33e38d94713ea
   md5: bfed1a5dcc2c00d8cabd96f442399ff8
@@ -11367,7 +11367,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/pre-commit?source=compressed-mapping
+  - pkg:pypi/pre-commit?source=hash-mapping
   run_exports: {}
   size: 201879
   timestamp: 1786408353117
@@ -12789,7 +12789,7 @@ packages:
   license: Apache-2.0
   license_family: APACHE
   purls:
-  - pkg:pypi/websocket-client?source=hash-mapping
+  - pkg:pypi/websocket-client?source=compressed-mapping
   run_exports: {}
   size: 78254
   timestamp: 1788531123810
@@ -16131,7 +16131,7 @@ packages:
   - watchdog
   - xarray
   requires_python: '>=3.14'
-- pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#0e0c964186c323a41c998e575a8311cbd8f239af
+- pypi: git+https://github.com/43ravens/NEMO_Nowcast.git#80126bbc0be0ba14a09bf6385460d53a0bc50574
   name: nemo-nowcast
   version: 26.2.dev0
   requires_dist:
@@ -16147,7 +16147,7 @@ packages:
   - coverage ; extra == 'test'
   - pytest ; extra == 'test'
   requires_python: '>=3.12'
-- pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#1421d9ffa4c36ef2a03ab08212886fb6b3fd01d0
+- pypi: git+https://github.com/SalishSeaCast/NEMO-Cmd.git#a9f57e9af716539722eabf00f824be4dca939479
   name: nemo-cmd
   version: 26.2.dev0
   requires_dist:
@@ -16159,7 +16159,7 @@ packages:
   - python-hglib
   - pyyaml
   requires_python: '>=3.12'
-- pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#017239bf5c105e2ce0a6d145ea10c1a63f72da25
+- pypi: git+https://github.com/SalishSeaCast/SalishSeaCmd.git#266094d3e42531be3224a73ae4acdcad0440b393
   name: salishseacmd
   version: 26.2.dev0
   requires_dist:
@@ -16185,7 +16185,7 @@ packages:
   - supervisor
   - waitress
   requires_python: '>=3.13'
-- pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3ebd3aac1c96bd6f5143dda268e3284169899da3
+- pypi: git+https://github.com/SalishSeaCast/tools.git?subdirectory=SalishSeaTools#3d5d795bf9ab124e9d05c3d211930e61d0eeac85
   name: salishseatools
   version: 25.1.dev0
   requires_dist:
@@ -16209,12 +16209,11 @@ packages:
   - tqdm
   - xarray
   requires_python: '>=3.11'
-- pypi: git+https://github.com/UBC-MOAD/Reshapr.git#8b481484f8a73a9d86866c219b87730d91ad6d10
+- pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
   name: reshapr
   version: 26.2.dev0
   requires_dist:
   - arrow
-  - bottleneck
   - click
   - dask
   - flox
@@ -16225,7 +16224,7 @@ packages:
   - structlog
   - xarray
   requires_python: '>=3.12'
-- pypi: git+https://github.com/UBC-MOAD/moad_tools.git#84ee6467cd09494f0e0dc5e04d5d2f919dccb46c
+- pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
   name: moad-tools
   version: 26.2.dev0
   requires_dist:
