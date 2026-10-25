@@ -41,7 +41,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -372,6 +371,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -509,7 +509,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -669,6 +668,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   dev:
     channels:
@@ -699,7 +699,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -1109,6 +1108,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -1317,7 +1317,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -1481,6 +1480,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
@@ -1513,7 +1513,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -1864,6 +1863,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -2019,7 +2019,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -2179,6 +2178,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
@@ -2212,7 +2212,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -2698,6 +2697,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -2980,7 +2980,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -3148,6 +3147,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/87/c7/b5c8015d823bfda1a346adb2c634a2101d50bb75d421eb6dcb31acd25ebc/sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
@@ -3280,7 +3280,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -3621,6 +3620,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -3767,7 +3767,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -3928,6 +3927,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
   test-py314:
     channels:
@@ -3958,7 +3958,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/azure-storage-files-datalake-cpp-12.16.0-h1f05bef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bcrypt-5.0.0-py314h7e8cd81_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-h9908984_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py314hcd2bdb6_4.conda
@@ -4299,6 +4298,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -4445,7 +4445,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/azure-storage-files-datalake-cpp-12.16.0-hf005220_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bcrypt-5.0.0-py314h3cfb53e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/blosc-1.21.6-hd145fbb_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h086410e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py314h21a1a37_4.conda
@@ -4606,6 +4605,7 @@ environments:
       - pypi: git+https://github.com/UBC-MOAD/Reshapr.git#ce655e6f45dad2a107ffc144a45d2834b5805797
       - pypi: git+https://github.com/UBC-MOAD/moad_tools.git#664a5e7974df92a7bb3164dd17dc9fe6f3aa9e57
       - pypi: https://files.pythonhosted.org/packages/01/cf/b32482b388c87bc8d5f0fde72488005babbd286bbf9a249b92c9444f6596/angles-2.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fb/11/1cfa47d5e2aa45f6a803fcdf4484f8255383221ccb2f521d9010afca0d8d/python-hglib-2.6.2.tar.gz
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
@@ -5025,23 +5025,6 @@ packages:
     - blosc >=1.21.6,<2.0a0
   size: 48427
   timestamp: 1733513201413
-- conda: https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.6.0-np2py314h8874201_4.conda
-  sha256: 78ecc78aaac7c5a0dfbef6ccc3d6d50736004cc8aeb0dcaa379d07a65c007ff2
-  md5: 9fd0c96a6eb2b163fcf2234ed8f0565c
-  depends:
-  - numpy
-  - python
-  - libgcc >=15
-  - __glibc >=2.17,<3.0.a0
-  - numpy >=1.25,<3
-  - python_abi 3.14.* *_cp314
-  license: BSD-2-Clause
-  license_family: BSD
-  purls:
-  - pkg:pypi/bottleneck?source=compressed-mapping
-  run_exports: {}
-  size: 160735
-  timestamp: 1789125816478
 - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-1.2.0-h505cf86_4.conda
   sha256: 61b78574f002390b6a7fc79834fc344beaab09550068a51100eea5a485dac741
   md5: 746aa619a1bcaf4da541101179d7c60e
@@ -13254,22 +13237,6 @@ packages:
     - blosc >=1.21.6,<2.0a0
   size: 46990
   timestamp: 1733513422834
-- conda: https://conda.anaconda.org/conda-forge/osx-64/bottleneck-1.6.0-np2py314hc91a65a_4.conda
-  sha256: d6492529859a9a031936067c6f9f371598b0367021642cf544d6d754e20e6b1f
-  md5: 9298260eabc5ef4194904ab015c0cbfd
-  depends:
-  - numpy
-  - python
-  - __osx >=11.0
-  - python_abi 3.14.* *_cp314
-  - numpy >=1.25,<3
-  license: BSD-2-Clause
-  license_family: BSD
-  purls:
-  - pkg:pypi/bottleneck?source=compressed-mapping
-  run_exports: {}
-  size: 161064
-  timestamp: 1789125987140
 - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-1.2.0-ha9642f3_4.conda
   sha256: 1f890b7c8b8d7dc765bcbc547d4e1eb53d656396b722c54850a1f62ca48181b1
   md5: 8d6a4a452d3413e7aff101fd32170076
@@ -16080,7 +16047,6 @@ packages:
   - angles>=2.0,<3
   - arrow
   - beautifulsoup4
-  - bottleneck
   - cartopy
   - cfgrib
   - click
@@ -16246,6 +16212,16 @@ packages:
   name: angles
   version: '2.0'
   sha256: 7cd0b8c0b13065a98af80a30175470f55c5b09f4c33532729769d75c76e3198b
+- pypi: https://files.pythonhosted.org/packages/14/d8/6d641573e210768816023a64966d66463f2ce9fc9945fa03290c8a18f87c/bottleneck-1.6.0.tar.gz
+  name: bottleneck
+  version: 1.6.0
+  sha256: 028d46ee4b025ad9ab4d79924113816f825f62b17b87c9e1d0d8ce144a4a0e31
+  requires_dist:
+  - numpy
+  - numpydoc ; extra == 'doc'
+  - sphinx ; extra == 'doc'
+  - gitpython ; extra == 'doc'
+  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl
   name: sphinxcontrib-jquery
   version: '4.1'
@@ -16266,6 +16242,16 @@ packages:
   - wheel ; extra == 'dev'
   - twine ; extra == 'dev'
   requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/99/ec/c6f3be848f37689f481797ce7d9807d5f69a199d7fc0e46044f9b708c468/bottleneck-1.6.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+  name: bottleneck
+  version: 1.6.0
+  sha256: 1fad24c99e39ad7623fc2a76d37feb26bd32e4dd170885edf4dbf4bfce2199a3
+  requires_dist:
+  - numpy
+  - numpydoc ; extra == 'doc'
+  - sphinx ; extra == 'doc'
+  - gitpython ; extra == 'doc'
+  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/b4/7a/6dfd38adf1206365f584384ef58e8c51465519bb0f298f1bf9054e6ddc21/metpx_sarracenia-2.22.10.post2-py3-none-any.whl
   name: metpx-sarracenia
   version: 2.22.10.post2
