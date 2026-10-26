@@ -483,7 +483,7 @@ and set the owner and group:
 
 Set up the NFS server service to provide access to the shared storage on the compute nodes.
 
-Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
+Reference: https://ubuntu.com/server/docs/how-to/networking/install-nfs/
 
 .. code-block:: console
 

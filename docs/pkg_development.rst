@@ -407,7 +407,7 @@ The output looks something like:
     (deployment/arbutus_cloud: line  751) ok        https://github.com/conda-forge/miniforge
     ( pkg_development: line   23) ok        https://github.com/pypa/hatch
     ( pkg_development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
-    (deployment/arbutus_cloud: line  425) ok        https://help.ubuntu.com/community/SettingUpNFSHowTo
+    (deployment/arbutus_cloud: line  425) ok        https://ubuntu.com/server/docs/how-to/networking/install-nfs/
     ( pkg_development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
     ( pkg_development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
     (deployment/operations: line  122) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
