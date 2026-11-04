@@ -105,7 +105,7 @@ class TestCalcAvgT:
     def test_calcAvgT_threshold_boundary_success(self):
         mthresh = 5.01
         turbidity_vals = [0.0] * 35
-        for i in range(5, 25):
+        for i in range(5, 5 + 19):
             turbidity_vals[i] = 15.0
         dfout = pd.DataFrame({"turbidity": turbidity_vals})
         ymd = "2024-01-01"
@@ -117,10 +117,10 @@ class TestCalcAvgT:
     def test_calcAvgT_excludes_non_positive_values(self):
         mthresh = 5.01
         turbidity_vals = [0.0] * 35
-        for i in range(5, 25):
+        for i in range(5, 5 + 19):
             turbidity_vals[i] = 20.0
-        turbidity_vals[25] = -1.0
-        turbidity_vals[26] = 0.0
+        turbidity_vals[24] = -1.0
+        turbidity_vals[25] = 0.0
         dfout = pd.DataFrame({"turbidity": turbidity_vals})
         ymd = "2024-01-01"
 
@@ -131,11 +131,11 @@ class TestCalcAvgT:
     def test_calcAvgT_insufficient_data_raises_value_error(self, caplog):
         mthresh = 5.01
         turbidity_vals = [0.0] * 35
-        for i in range(5, 24):
+        for i in range(5, 5 + 18):
             turbidity_vals[i] = 10.0
         dfout = pd.DataFrame({"turbidity": turbidity_vals})
         ymd = "2024-01-01"
-        caplog.set_level(logging.DEBUG)
+        caplog.set_level(logging.WARNING)
 
         with pytest.raises(
             ValueError,

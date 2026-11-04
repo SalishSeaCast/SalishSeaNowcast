@@ -228,7 +228,7 @@ def _calcAvgT(dfout, mthresh, ymd):
     i0 = int(mthresh)
     i1 = i0 + 23
     dfdata = dfout.loc[i0:i1]
-    if len(dfdata.loc[dfdata["turbidity"] > 0].values) > 19:
+    if len(dfdata.loc[dfdata["turbidity"] > 0].values) > 18:
         dfdata2 = dfdata.loc[dfdata["turbidity"] > 0]
         iTurb = np.mean(dfdata2["turbidity"].values)
     else:
