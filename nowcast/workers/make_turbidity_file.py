@@ -228,7 +228,11 @@ def _calcAvgT(dfout, mthresh, ymd):
     i0 = int(mthresh)
     i1 = i0 + 23
     dfdata = dfout.loc[i0:i1]
-    if len(dfdata.loc[dfdata["turbidity"] > 0].values) > 19:
+    if len(dfdata.loc[dfdata["turbidity"] > 0].values) > 18:
+        # Changed to 18 from 19 because 19 is too strict after BC changed to permanent PDT time zone
+        # on 1nov26. The number of hours with turbidity data seems to be tightly coupled with the
+        # time at which the worker runs. It failed in production when run at 08:28:24 on 3nov26,
+        # but worked when run in the debugger at ~10:00.
         dfdata2 = dfdata.loc[dfdata["turbidity"] > 0]
         iTurb = np.mean(dfdata2["turbidity"].values)
     else:
