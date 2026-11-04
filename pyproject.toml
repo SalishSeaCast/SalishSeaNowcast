@@ -247,6 +247,7 @@ mock = "5.2.0.*"
 pillow = "12.2.0.*"
 scipy-stubs = ">=1.18.0.1,<2"
 pandas-stubs = "2.3.3.*"
+gh = ">=2.103.3,<3"
 
 [tool.pixi.feature.dev.tasks]
 pytest = "pytest -n6 --randomly-seed=last"
