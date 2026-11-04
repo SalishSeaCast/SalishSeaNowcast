@@ -23,6 +23,7 @@ from types import SimpleNamespace
 
 import arrow
 import nemo_nowcast
+import pandas as pd
 import pytest
 
 from nowcast.workers import make_turbidity_file
@@ -86,3 +87,65 @@ class TestFailure:
         expected = "2017-07-08 Fraser River turbidity file creation failed"
         assert caplog.records[0].message == expected
         assert msg_type == "failure"
+
+
+class TestCalcAvgT:
+    """Unit tests for _calcAvgT() helper function."""
+
+    def test_calcAvgT_sufficient_data(self):
+        mthresh = 5.01
+        turbidity_vals = [10.0] * 35
+        dfout = pd.DataFrame({"turbidity": turbidity_vals})
+        ymd = "2024-01-01"
+
+        avg_turb = make_turbidity_file._calcAvgT(dfout, mthresh, ymd)
+
+        assert avg_turb == 10.0
+
+    def test_calcAvgT_threshold_boundary_success(self):
+        mthresh = 5.01
+        turbidity_vals = [0.0] * 35
+        for i in range(5, 25):
+            turbidity_vals[i] = 15.0
+        dfout = pd.DataFrame({"turbidity": turbidity_vals})
+        ymd = "2024-01-01"
+
+        avg_turb = make_turbidity_file._calcAvgT(dfout, mthresh, ymd)
+
+        assert avg_turb == 15.0
+
+    def test_calcAvgT_excludes_non_positive_values(self):
+        mthresh = 5.01
+        turbidity_vals = [0.0] * 35
+        for i in range(5, 25):
+            turbidity_vals[i] = 20.0
+        turbidity_vals[25] = -1.0
+        turbidity_vals[26] = 0.0
+        dfout = pd.DataFrame({"turbidity": turbidity_vals})
+        ymd = "2024-01-01"
+
+        avg_turb = make_turbidity_file._calcAvgT(dfout, mthresh, ymd)
+
+        assert avg_turb == 20.0
+
+    def test_calcAvgT_insufficient_data_raises_value_error(self, caplog):
+        mthresh = 5.01
+        turbidity_vals = [0.0] * 35
+        for i in range(5, 24):
+            turbidity_vals[i] = 10.0
+        dfout = pd.DataFrame({"turbidity": turbidity_vals})
+        ymd = "2024-01-01"
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(
+            ValueError,
+            match="Insufficient data after interpolation to create Fraser River turbidity file for 2024-01-01",
+        ):
+            make_turbidity_file._calcAvgT(dfout, mthresh, ymd)
+
+        assert caplog.records[0].levelname == "WARNING"
+        expected = (
+            "Insufficient data after interpolation to create Fraser River "
+            "turbidity file for 2024-01-01"
+        )
+        assert caplog.records[0].message == expected
