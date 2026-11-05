@@ -40,7 +40,7 @@ title_font = {
     "fontname": "Bitstream Vera Sans",
     "size": "15",
     "color": "white",
-    "weight": "medium",
+    "weight": "normal",
 }
 axis_font = {"fontname": "Bitstream Vera Sans", "size": "13", "color": "white"}
 

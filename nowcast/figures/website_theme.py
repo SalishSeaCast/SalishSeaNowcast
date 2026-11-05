@@ -104,55 +104,55 @@ COLOURS = {
 #: to which the font properties apply.
 FONTS = {
     "axes annotation": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "axes title": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "axes title large": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=35
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=35
     ),
     "axis": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "axis small": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=12
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=12
     ),
     "figure annotation": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "figure annotation small": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=10
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=10
     ),
     "figure title": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "info box title": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=20
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=20
     ),
     "info box content": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "legend label": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "legend label large": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=25
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=25
     ),
     "legend label small": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=12
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=12
     ),
     "legend title": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=20
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=20
     ),
     "legend title small": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=15
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=15
     ),
     "location label large": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=20
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=20
     ),
     "location label small": FontProperties(
-        family=["Bitstream Vera Sans", "sans-serif"], weight="medium", size=13
+        family=["Bitstream Vera Sans", "sans-serif"], weight="normal", size=13
     ),
 }
 
