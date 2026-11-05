@@ -35,12 +35,12 @@ from nowcast.figures import research_VENUS
 
 # Font format
 title_font = {
-    "fontname": "Bitstream Vera Sans",
+    "fontname": "DejaVu Sans",
     "size": "15",
     "color": "black",
     "weight": "normal",
 }
-axis_font = {"fontname": "Bitstream Vera Sans", "size": "13"}
+axis_font = {"fontname": "DejaVu Sans", "size": "13"}
 
 FERRY_ROUTES = {
     "HB_DB": {
