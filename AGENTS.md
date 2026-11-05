@@ -1,8 +1,10 @@
 # AGENTS Instructions
 
 ## Project & Environment Overview
+- **Repository:** Origin repository is on GitHub (`https://github.com/SalishSeaCast/SalishSeaNowcast`).
 - **Package Manager:** This project strictly uses [Pixi](https://pixi.sh) for environment, dependency, and task management.
 - **Python Version:** Managed via Pixi's `pyproject.toml` / `pixi.lock`.
+- **GitHub CLI:** The GitHub CLI (`gh`) tool is included in the `dev` environment for use by agents.
 
 ## Execution Rules (Crucial)
 1. **Never use raw global tools:** Do NOT execute direct `pip install`, `python`, `pytest`, or `conda` commands.
@@ -12,6 +14,7 @@
    - Add dev dependencies: `pixi add --feature dev <package_name>`
    - Execute project tasks: `pixi run <task_name>`
    - Run tests: `pixi run -e dev pytest` — extra arguments can be appended (e.g. a specific test name or directory).
+   - Run GitHub CLI commands: `pixi run -e dev gh <command>`
 
 ## Directory Layout
 - `nowcast/`: Core application source code.
