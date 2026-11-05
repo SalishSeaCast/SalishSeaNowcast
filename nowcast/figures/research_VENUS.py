@@ -37,12 +37,12 @@ from nowcast import residuals
 
 # Font format
 title_font = {
-    "fontname": "Bitstream Vera Sans",
+    "fontname": "DejaVu Sans",
     "size": "15",
     "color": "white",
-    "weight": "medium",
+    "weight": "normal",
 }
-axis_font = {"fontname": "Bitstream Vera Sans", "size": "13", "color": "white"}
+axis_font = {"fontname": "DejaVu Sans", "size": "13", "color": "white"}
 
 # Constants defined for the VENUS nodes
 # Lat/lon/depth from the VENUS website. Depth is in meters.
