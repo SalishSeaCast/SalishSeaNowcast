@@ -94,6 +94,45 @@ class TestMain:
         assert worker.cli.parser._actions[4].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "watch_NEMO" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["watch_NEMO"]
+        assert msg_registry["checklist key"] == "NEMO run"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["watch_NEMO"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "need",
+            "success nowcast",
+            "failure nowcast",
+            "success nowcast-green",
+            "failure nowcast-green",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ]
+
+    @pytest.mark.parametrize(
+        "run_type, duration",
+        (
+            ("nowcast", 1),
+            ("nowcast-green", 1),
+            ("forecast", 1.5),
+            ("forecast2", 1.25),
+        ),
+    )
+    def test_durations(self, run_type, duration, prod_config):
+        run_type_duration = prod_config["run types"][run_type]["duration"]
+
+        assert run_type_duration == duration
+
+
 class TestSuccess:
     """Unit tests for success() function."""
 
