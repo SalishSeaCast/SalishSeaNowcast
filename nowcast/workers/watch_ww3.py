@@ -28,7 +28,7 @@ from nemo_nowcast import NowcastWorker
 NAME = "watch_ww3"
 logger = logging.getLogger(NAME)
 
-POLL_INTERVAL = 5 * 60  # seconds
+POLL_INTERVAL = 2 * 60  # seconds
 
 
 def main():
