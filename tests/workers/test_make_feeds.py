@@ -95,6 +95,78 @@ class TestMain:
         assert worker.cli.parser._actions[4].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "make_feeds" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_feeds"]
+        assert msg_registry["checklist key"] == "storm surge alert feeds"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_feeds"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ]
+
+    def test_figures_storage_path(self, prod_config):
+        assert prod_config["figures"]["storage path"] == "/results/nowcast-sys/figures/"
+
+    def test_figures_storm_surge_info_portal_path(self, prod_config):
+        assert prod_config["figures"]["storm surge info portal path"] == "storm-surge/"
+
+    def test_storm_surge_feeds_storage_path(self, prod_config):
+        assert prod_config["storm surge feeds"]["storage path"] == "atom"
+
+    def test_storm_surge_feeds_domain(self, prod_config):
+        assert prod_config["storm surge feeds"]["domain"] == "salishsea.eos.ubc.ca"
+
+    def test_storm_surge_feeds_feed_entry_template(self, prod_config):
+        assert (
+            prod_config["storm surge feeds"]["feed entry template"]
+            == "storm_surge_advisory.mako"
+        )
+
+    def test_storm_surge_feeds_pmv(self, prod_config):
+        feed = prod_config["storm surge feeds"]["feeds"]["pmv.xml"]
+        assert (
+            feed["title"] == "SalishSeaCast Storm Surge Alerts for Port Metro Vancouver"
+        )
+        assert feed["city"] == "Vancouver"
+        assert feed["tide gauge stn"] == "Point Atkinson"
+        assert (
+            feed["tidal predictions"]
+            == "Point Atkinson_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"
+        )
+
+    def test_ssh_tidal_predictions(self, prod_config):
+        assert (
+            prod_config["ssh"]["tidal predictions"]
+            == "/SalishSeaCast/tidal-predictions/"
+        )
+
+    @pytest.mark.parametrize(
+        "run_type, expected",
+        (
+            ("forecast", "/results/SalishSea/forecast.202111/"),
+            ("forecast2", "/results/SalishSea/forecast2.202111/"),
+        ),
+    )
+    def test_results_archive(self, run_type, expected, prod_config):
+        assert prod_config["results archive"][run_type] == expected
+
+    def test_weather_ops_dir(self, prod_config):
+        assert (
+            prod_config["weather"]["ops dir"]
+            == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
+
+
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 class TestSuccess:
     """Unit tests for success() function."""
