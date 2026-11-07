@@ -224,6 +224,180 @@ class TestMain:
         assert worker.cli.parser._actions[5].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "run_NEMO" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO"]
+        assert msg_registry["checklist key"] == "NEMO run"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "need",
+            "success nowcast",
+            "failure nowcast",
+            "success nowcast-green",
+            "failure nowcast-green",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ]
+
+    @pytest.mark.parametrize(
+        "run_type, duration",
+        (
+            ("nowcast", 1),
+            ("nowcast-green", 1),
+            ("forecast", 1.5),
+            ("forecast2", 1.25),
+        ),
+    )
+    def test_durations(self, run_type, duration, prod_config):
+        assert prod_config["run types"][run_type]["duration"] == duration
+
+    @pytest.mark.parametrize(
+        "run_type, restart_from",
+        (
+            ("nowcast", "nowcast-green"),
+            ("nowcast-green", "nowcast-green"),
+            ("forecast", "nowcast"),
+            ("forecast2", "forecast"),
+        ),
+    )
+    def test_restart_from(self, run_type, restart_from, prod_config):
+        assert prod_config["run types"][run_type]["restart from"] == restart_from
+
+    @pytest.mark.parametrize(
+        "run_type, config_name",
+        (
+            ("nowcast", "SalishSeaCast_Blue"),
+            ("nowcast-green", "SalishSeaCast"),
+            ("forecast", "SalishSeaCast_Blue"),
+            ("forecast2", "SalishSeaCast_Blue"),
+        ),
+    )
+    def test_config_name(self, run_type, config_name, prod_config):
+        assert prod_config["run types"][run_type]["config name"] == config_name
+
+    @pytest.mark.parametrize(
+        "run_type, coordinates",
+        (
+            ("nowcast", "coordinates_seagrid_SalishSea201702.nc"),
+            ("nowcast-green", "coordinates_seagrid_SalishSea201702.nc"),
+            ("forecast", "coordinates_seagrid_SalishSea201702.nc"),
+            ("forecast2", "coordinates_seagrid_SalishSea201702.nc"),
+        ),
+    )
+    def test_coordinates(self, run_type, coordinates, prod_config):
+        assert prod_config["run types"][run_type]["coordinates"] == coordinates
+
+    @pytest.mark.parametrize(
+        "run_type, bathymetry",
+        (
+            ("nowcast", "bathymetry_202108.nc"),
+            ("nowcast-green", "bathymetry_202108.nc"),
+            ("forecast", "bathymetry_202108.nc"),
+            ("forecast2", "bathymetry_202108.nc"),
+        ),
+    )
+    def test_bathymetry(self, run_type, bathymetry, prod_config):
+        assert prod_config["run types"][run_type]["bathymetry"] == bathymetry
+
+    @pytest.mark.parametrize(
+        "run_type, lpe",
+        (
+            ("nowcast", "bathymetry_202108.csv"),
+            ("nowcast-green", "bathymetry_202108.csv"),
+            ("forecast", "bathymetry_202108.csv"),
+            ("forecast2", "bathymetry_202108.csv"),
+        ),
+    )
+    def test_land_processor_elimination(self, run_type, lpe, prod_config):
+        assert prod_config["run types"][run_type]["land processor elimination"] == lpe
+
+    def test_run_prep_dir(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["run prep dir"] == "/nemoShare/MEOPAR/nowcast-sys/runs"
+
+    def test_grid_dir(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["grid dir"] == "/nemoShare/MEOPAR/nowcast-sys/grid/"
+
+    def test_salishsea_cmd(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        expected = (
+            "/home/ubuntu/.pixi/bin/pixi run -m "
+            "/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast salishsea"
+        )
+        assert host_config["salishsea_cmd"] == expected
+
+    def test_job_exec_cmd(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["job exec cmd"] == "bash"
+
+    def test_mpi_hosts_file(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["mpi hosts file"] == "${HOME}/mpi_hosts"
+
+    def test_bottom_friction_mask(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        expected = "/nemoShare/MEOPAR/nowcast-sys/grid/jetty_mask_bathy201702.nc"
+        assert host_config["forcing"]["bottom friction mask"] == expected
+
+    @pytest.mark.parametrize(
+        "run_type, run_sets_dir",
+        (
+            (
+                "nowcast",
+                "/nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-blue/",
+            ),
+            ("forecast", "/nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast/"),
+            (
+                "forecast2",
+                "/nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast2/",
+            ),
+            (
+                "nowcast-green",
+                "/nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-green/",
+            ),
+        ),
+    )
+    def test_run_sets_dir(self, run_type, run_sets_dir, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["run types"][run_type]["run sets dir"] == run_sets_dir
+
+    @pytest.mark.parametrize(
+        "run_type, mpi_decomp",
+        (
+            ("nowcast", "10x17"),
+            ("forecast", "10x17"),
+            ("forecast2", "10x17"),
+            ("nowcast-green", "10x17"),
+        ),
+    )
+    def test_mpi_decomposition(self, run_type, mpi_decomp, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["run types"][run_type]["mpi decomposition"] == mpi_decomp
+
+    @pytest.mark.parametrize(
+        "run_type, results",
+        (
+            ("nowcast", "/nemoShare/MEOPAR/SalishSea/nowcast/"),
+            ("forecast", "/nemoShare/MEOPAR/SalishSea/forecast/"),
+            ("forecast2", "/nemoShare/MEOPAR/SalishSea/forecast2/"),
+            ("nowcast-green", "/nemoShare/MEOPAR/SalishSea/nowcast-green/"),
+        ),
+    )
+    def test_results(self, run_type, results, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        assert host_config["run types"][run_type]["results"] == results
+
+
 @pytest.mark.parametrize(
     "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
 )
