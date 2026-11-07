@@ -59,6 +59,42 @@ class TestMain:
         assert worker.cli.parser._actions[3].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "make_turbidity_file" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_turbidity_file"]
+        assert msg_registry["checklist key"] == "Fraser River turbidity"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_turbidity_file"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success",
+            "failure",
+            "crash",
+        ]
+
+    def test_rivers_turbidity_ECget_Fraser_turbidity(self, prod_config):
+        assert (
+            prod_config["rivers"]["turbidity"]["ECget Fraser turbidity"]
+            == "/results/observations/ECCC/fraser_buoy.csv"
+        )
+
+    def test_rivers_turbidity_forcing_dir(self, prod_config):
+        assert (
+            prod_config["rivers"]["turbidity"]["forcing dir"]
+            == "/results/forcing/rivers/river_turb/"
+        )
+
+    def test_rivers_turbidity_file_template(self, prod_config):
+        assert (
+            prod_config["rivers"]["turbidity"]["file template"]
+            == "riverTurbDaily2_{:y%Ym%md%d}.nc"
+        )
+
+
 class TestSuccess:
     """Unit test for success() function."""
 

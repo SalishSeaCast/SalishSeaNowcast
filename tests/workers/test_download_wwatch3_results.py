@@ -73,6 +73,60 @@ class TestMain:
         assert worker.cli.parser._actions[5].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "download_wwatch3_results" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "download_wwatch3_results"
+        ]
+        assert msg_registry["checklist key"] == "WWATCH3 results files"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "download_wwatch3_results"
+        ]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success forecast2",
+            "failure forecast2",
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ]
+
+    def test_file_group(self, prod_config):
+        assert "file group" in prod_config
+        assert prod_config["file group"] == "sallen"
+
+    @pytest.mark.parametrize(
+        "run_type, expected",
+        (
+            ("nowcast", "/nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/"),
+            ("forecast", "/nemoShare/MEOPAR/SalishSea/wwatch3-forecast/"),
+            ("forecast2", "/nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/"),
+        ),
+    )
+    def test_results(self, run_type, expected, prod_config):
+        results = prod_config["wave forecasts"]["results"]
+        assert results[run_type] == expected
+
+    @pytest.mark.parametrize(
+        "run_type, expected",
+        (
+            ("nowcast", "/opp/wwatch3/nowcast/"),
+            ("forecast", "/opp/wwatch3/forecast/"),
+            ("forecast2", "/opp/wwatch3/forecast2/"),
+        ),
+    )
+    def test_results_archive(self, run_type, expected, prod_config):
+        results_archive = prod_config["wave forecasts"]["results archive"]
+        assert results_archive[run_type] == expected
+
+
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
