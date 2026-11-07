@@ -1,5 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
 
+## Project files and directories
+.worktrees/
+
 ## IntelliJ project files
 .idea
 *.iml

@@ -40,6 +40,14 @@
   - Follow with a detailed explanation of 2–3 sentences maximum.
   - Avoid overly verbose descriptions or unnecessary details.
 
+## Git Worktree Workflow
+For non-trivial changes (new features, bug fixes, complex refactors):
+1. Create a new Git worktree inside `.worktrees/` at the project root, rather than working directly in the main checkout.
+2. Name the branch descriptively (e.g., `feature/auth-refactor`, `fix/data-loading`).
+3. After creating the worktree, run `pixi install -e dev` inside it to set up the local environment.
+4. Run all tests and builds inside the worktree environment.
+5. Clean up the worktree and prune the branch once the task is merged or completed.
+
 ## Safety & Constraints
 - **Lockfile Integrity:** Do not edit `pixi.lock` manually. If `pyproject.toml` changes, run `pixi install` to re-sync.
 - **Environment Isolation:** Do not suggest creating global virtual environments (`venv` or `virtualenv`) or standard Conda environments.
