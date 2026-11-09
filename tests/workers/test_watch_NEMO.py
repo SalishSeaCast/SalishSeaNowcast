@@ -440,29 +440,33 @@ class TestPidExists:
         with pytest.raises(ValueError):
             watch_NEMO._pid_exists(0)
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", return_value=None, autospec=True)
-    def test_pid_exists(self, m_kill):
+    def test_pid_exists(self, monkeypatch):
+        monkeypatch.setattr(watch_NEMO.os, "kill", lambda pid, sig: None)
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch(
-        "nowcast.workers.watch_NEMO.os.kill",
-        side_effect=ProcessLookupError,
-        autospec=True,
-    )
-    def test_no_such_pid(self, m_kill):
+    def test_no_such_pid(self, monkeypatch):
+        monkeypatch.setattr(
+            watch_NEMO.os,
+            "kill",
+            lambda pid, sig: (_ for _ in ()).throw(ProcessLookupError()),
+        )
         pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists
 
-    @patch(
-        "nowcast.workers.watch_NEMO.os.kill", side_effect=PermissionError, autospec=True
-    )
-    def test_pid_permission_error(self, m_kill):
+    def test_pid_permission_error(self, monkeypatch):
+        monkeypatch.setattr(
+            watch_NEMO.os,
+            "kill",
+            lambda pid, sig: (_ for _ in ()).throw(PermissionError()),
+        )
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=OSError, autospec=True)
-    def test_oserror(self, m_kill):
+    def test_oserror(self, monkeypatch):
+        monkeypatch.setattr(
+            watch_NEMO.os, "kill", lambda pid, sig: (_ for _ in ()).throw(OSError())
+        )
         with pytest.raises(OSError):
             watch_NEMO._pid_exists(42)
 
