@@ -441,32 +441,34 @@ class TestPidExists:
             watch_NEMO._pid_exists(0)
 
     def test_pid_exists(self, monkeypatch):
-        monkeypatch.setattr(watch_NEMO.os, "kill", lambda pid, sig: None)
+        def mock_kill(pid, sig):
+            return None
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
     def test_no_such_pid(self, monkeypatch):
-        monkeypatch.setattr(
-            watch_NEMO.os,
-            "kill",
-            lambda pid, sig: (_ for _ in ()).throw(ProcessLookupError()),
-        )
+        def mock_kill(pid, sig):
+            raise ProcessLookupError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists
 
     def test_pid_permission_error(self, monkeypatch):
-        monkeypatch.setattr(
-            watch_NEMO.os,
-            "kill",
-            lambda pid, sig: (_ for _ in ()).throw(PermissionError()),
-        )
+        def mock_kill(pid, sig):
+            raise PermissionError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
     def test_oserror(self, monkeypatch):
-        monkeypatch.setattr(
-            watch_NEMO.os, "kill", lambda pid, sig: (_ for _ in ()).throw(OSError())
-        )
+        def mock_kill(pid, sig):
+            raise OSError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         with pytest.raises(OSError):
             watch_NEMO._pid_exists(42)
 
