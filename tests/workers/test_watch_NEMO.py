@@ -190,7 +190,6 @@ class TestFailure:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.watch_NEMO._pid_exists", autospec=True)
 @patch("nowcast.workers.watch_NEMO.f90nml.read", autospec=True)
 @patch(
     "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
@@ -206,11 +205,18 @@ class TestWatchNEMO:
 
         monkeypatch.setattr(watch_NEMO, "_find_run_pid", _mock_find_run_pid)
 
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_pid_exists(monkeypatch):
+        def _mock_pid_exists(pid):
+            return False
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", _mock_pid_exists)
+
     def test_checklist(
         self,
         m_confirm,
         m_nml_read,
-        m_pid_exists,
         run_type,
         host_name,
         config,
@@ -220,7 +226,6 @@ class TestWatchNEMO:
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
             "namdom": {"rn_rdt": 40},
         }
-        m_pid_exists.return_value = False
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -252,19 +257,25 @@ class TestWatchNEMO:
         self,
         m_confirm,
         m_nml_read,
-        m_pid_exists,
         run_type,
         host_name,
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
+        pid_exists = iter((True, False))
+
+        def mock_pid_exists(pid):
+            return next(pid_exists)
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
+
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_nml_read.return_value = {
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
             "namdom": {"rn_rdt": 40},
         }
-        m_pid_exists.side_effect = (True, False)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -296,13 +307,20 @@ class TestWatchNEMO:
         self,
         m_confirm,
         m_nml_read,
-        m_pid_exists,
         run_type,
         host_name,
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
+        pid_exists = iter((True, False))
+
+        def mock_pid_exists(pid):
+            return next(pid_exists)
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
+
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         time_step = tmp_run_dir.ensure("time.step")
         time_step.write("1081\n")
@@ -315,7 +333,6 @@ class TestWatchNEMO:
             },
             "namdom": {"rn_rdt": 40},
         }
-        m_pid_exists.side_effect = (True, False)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -347,7 +364,6 @@ class TestWatchNEMO:
         self,
         m_confirm,
         m_nml_read,
-        m_pid_exists,
         run_type,
         host_name,
         config,
@@ -357,7 +373,6 @@ class TestWatchNEMO:
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
             "namdom": {"rn_rdt": 40},
         }
-        m_pid_exists.return_value = False
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
