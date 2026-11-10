@@ -28,7 +28,7 @@ from unittest.mock import call, Mock, patch
 import arrow
 import nemo_nowcast
 import pytest
-from nemo_nowcast import NowcastWorker, Message
+from nemo_nowcast import Message
 
 from nowcast.workers import watch_NEMO
 
@@ -236,10 +236,9 @@ class TestWatchNEMO:
             }
 
         monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -249,11 +248,12 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         caplog.set_level(logging.DEBUG)
 
-        checklist = watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        checklist = watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = f"{run_type} on {host_name}: run pid: 4343"
@@ -286,11 +286,9 @@ class TestWatchNEMO:
             }
 
         monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
-        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -300,12 +298,14 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         watch_NEMO.POLL_INTERVAL = 0
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[1].levelname == "INFO"
         expected = (
@@ -342,13 +342,9 @@ class TestWatchNEMO:
             }
 
         monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
-        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        time_step = tmp_run_dir.ensure("time.step")
-        time_step.write("1081\n")
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -358,12 +354,16 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        time_step = tmp_run_dir.ensure("time.step")
+        time_step.write("1081\n")
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         watch_NEMO.POLL_INTERVAL = 0
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[1].levelname == "INFO"
         expected = (
