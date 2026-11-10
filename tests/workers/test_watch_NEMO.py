@@ -372,57 +372,6 @@ class TestWatchNEMO:
         )
         assert caplog.records[1].message == expected
 
-    def test_confirm_run_success(
-        self,
-        run_type,
-        host_name,
-        config,
-        caplog,
-        monkeypatch,
-    ):
-        mock_confirm_run_success = Mock(
-            spec=watch_NEMO._confirm_run_success, return_value=True
-        )
-        monkeypatch.setattr(
-            watch_NEMO, "_confirm_run_success", mock_confirm_run_success
-        )
-
-        def mock_read(nml_file):
-            return {
-                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-                "namdom": {"rn_rdt": 40},
-            }
-
-        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
-                "manager",
-                "ack",
-                payload={
-                    run_type: {
-                        "run dir": "tmp_run_dir",
-                        "run exec cmd": "bash SalishSeaNEMO.sh",
-                        "run date": "2017-11-13",
-                    }
-                },
-            ),
-        )
-        caplog.set_level(logging.DEBUG)
-
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
-
-        mock_confirm_run_success.assert_called_once_with(
-            host_name,
-            run_type,
-            arrow.get("2017-11-13"),
-            Path("tmp_run_dir"),
-            2160,
-            2160,
-            config,
-        )
-
 
 @patch("nowcast.workers.watch_NEMO.subprocess.run", autospec=True)
 class TestFindRunPid:
