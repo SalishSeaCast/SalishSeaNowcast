@@ -190,7 +190,6 @@ class TestFailure:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.watch_NEMO.f90nml.read", autospec=True)
 @patch(
     "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
 )
@@ -216,16 +215,19 @@ class TestWatchNEMO:
     def test_checklist(
         self,
         m_confirm,
-        m_nml_read,
         run_type,
         host_name,
         config,
         caplog,
+        monkeypatch,
     ):
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
+        def mock_read(nml_file):
+            return {
+                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -256,7 +258,6 @@ class TestWatchNEMO:
     def test_time_step_not_found(
         self,
         m_confirm,
-        m_nml_read,
         run_type,
         host_name,
         config,
@@ -271,11 +272,14 @@ class TestWatchNEMO:
 
         monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
 
+        def mock_read(nml_file):
+            return {
+                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -306,7 +310,6 @@ class TestWatchNEMO:
     def test_time_step_found(
         self,
         m_confirm,
-        m_nml_read,
         run_type,
         host_name,
         config,
@@ -321,18 +324,21 @@ class TestWatchNEMO:
 
         monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
 
+        def mock_read(nml_file):
+            return {
+                "namrun": {
+                    "nn_it000": 1,
+                    "nn_itend": 2160,
+                    "nn_date0": 20_171_113,
+                    "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
+                },
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         time_step = tmp_run_dir.ensure("time.step")
         time_step.write("1081\n")
-        m_nml_read.return_value = {
-            "namrun": {
-                "nn_it000": 1,
-                "nn_itend": 2160,
-                "nn_date0": 20_171_113,
-                "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
-            },
-            "namdom": {"rn_rdt": 40},
-        }
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -363,16 +369,19 @@ class TestWatchNEMO:
     def test_confirm_run_success(
         self,
         m_confirm,
-        m_nml_read,
         run_type,
         host_name,
         config,
         caplog,
+        monkeypatch,
     ):
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
+        def mock_read(nml_file):
+            return {
+                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
