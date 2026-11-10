@@ -190,7 +190,6 @@ class TestFailure:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.watch_NEMO._find_run_pid", autospec=True)
 @patch("nowcast.workers.watch_NEMO._pid_exists", autospec=True)
 @patch("nowcast.workers.watch_NEMO.f90nml.read", autospec=True)
 @patch(
@@ -199,12 +198,19 @@ class TestFailure:
 class TestWatchNEMO:
     """Unit tests for watch_NEMO function."""
 
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_find_run_pid(monkeypatch):
+        def _mock_find_run_pid(run_info):
+            return 4343
+
+        monkeypatch.setattr(watch_NEMO, "_find_run_pid", _mock_find_run_pid)
+
     def test_checklist(
         self,
         m_confirm,
         m_nml_read,
         m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
@@ -215,7 +221,6 @@ class TestWatchNEMO:
             "namdom": {"rn_rdt": 40},
         }
         m_pid_exists.return_value = False
-        m_find_run_pid.return_value = 4343
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         tell_manager = Mock(
             spec=NowcastWorker.tell_manager,
@@ -248,7 +253,6 @@ class TestWatchNEMO:
         m_confirm,
         m_nml_read,
         m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
@@ -293,7 +297,6 @@ class TestWatchNEMO:
         m_confirm,
         m_nml_read,
         m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
@@ -345,7 +348,6 @@ class TestWatchNEMO:
         m_confirm,
         m_nml_read,
         m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
