@@ -190,9 +190,6 @@ class TestFailure:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch(
-    "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
-)
 class TestWatchNEMO:
     """Unit tests for watch_NEMO function."""
 
@@ -212,9 +209,20 @@ class TestWatchNEMO:
 
         monkeypatch.setattr(watch_NEMO, "_pid_exists", _mock_pid_exists)
 
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_confirm_run_success(monkeypatch):
+        def _mock_confirm_run_success(
+            host_name, run_type, run_date, run_dir, itend, restart_timestep, config
+        ):
+            return True
+
+        monkeypatch.setattr(
+            watch_NEMO, "_confirm_run_success", _mock_confirm_run_success
+        )
+
     def test_checklist(
         self,
-        m_confirm,
         run_type,
         host_name,
         config,
@@ -257,7 +265,6 @@ class TestWatchNEMO:
 
     def test_time_step_not_found(
         self,
-        m_confirm,
         run_type,
         host_name,
         config,
@@ -309,7 +316,6 @@ class TestWatchNEMO:
 
     def test_time_step_found(
         self,
-        m_confirm,
         run_type,
         host_name,
         config,
@@ -368,13 +374,19 @@ class TestWatchNEMO:
 
     def test_confirm_run_success(
         self,
-        m_confirm,
         run_type,
         host_name,
         config,
         caplog,
         monkeypatch,
     ):
+        mock_confirm_run_success = Mock(
+            spec=watch_NEMO._confirm_run_success, return_value=True
+        )
+        monkeypatch.setattr(
+            watch_NEMO, "_confirm_run_success", mock_confirm_run_success
+        )
+
         def mock_read(nml_file):
             return {
                 "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
@@ -401,7 +413,7 @@ class TestWatchNEMO:
 
         watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
 
-        m_confirm.assert_called_once_with(
+        mock_confirm_run_success.assert_called_once_with(
             host_name,
             run_type,
             arrow.get("2017-11-13"),
