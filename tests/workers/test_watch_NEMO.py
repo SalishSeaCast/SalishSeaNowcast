@@ -23,7 +23,7 @@ import subprocess
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -373,46 +373,79 @@ class TestWatchNEMO:
         assert caplog.records[1].message == expected
 
 
-@patch("nowcast.workers.watch_NEMO.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit tests for _find_run_pid() function."""
 
-    def test_find_qsub_run_pid(self, m_run, caplog):
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_pgrep_cmd(monkeypatch):
+        def _mock_pgrep_cmd(run_info):
+            return ["pgrep", "4343"]
+
+        monkeypatch.setattr(watch_NEMO, "_pgrep_cmd", _mock_pgrep_cmd)
+
+    def test_find_run_pid(self, monkeypatch):
+        def mock_run(cmd, stdout, check, universal_newlines):
+            return SimpleNamespace(stdout="4343")
+
+        monkeypatch.setattr(watch_NEMO.subprocess, "run", mock_run)
+
+        run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
+        pid = watch_NEMO._find_run_pid(run_info)
+
+        assert pid == 4343
+
+    def test_find_run_pid_process_not_spawned(self, monkeypatch):
+        run_results = iter(
+            (
+                subprocess.CalledProcessError(1, ["pgrep", "4343"]),
+                SimpleNamespace(stdout="4343"),
+            )
+        )
+
+        def mock_run(cmd, stdout, check, universal_newlines):
+            res = next(run_results)
+            if isinstance(res, Exception):
+                raise res
+            return res
+
+        monkeypatch.setattr(watch_NEMO.subprocess, "run", mock_run)
+
+        run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
+        pid = watch_NEMO._find_run_pid(run_info)
+
+        assert pid == 4343
+
+
+class TestPgrepCmd:
+    """Unit tests for _pgrep_cmd() function."""
+
+    def test_qsub_pgrep_cmd(self, caplog):
         run_info = {"run exec cmd": "qsub SalishSeaNEMO.sh", "run id": "4446.master"}
-        m_run.return_value = Mock(stdout="4446")
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO._find_run_pid(run_info)
+        cmd = watch_NEMO._pgrep_cmd(run_info)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = "searching processes for 4446.master"
         assert caplog.records[0].message == expected
-        assert m_run.call_args_list == [
-            call(
-                ["pgrep", "4446.master"],
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True,
-            )
-        ]
+        assert cmd == ["pgrep", "4446.master"]
 
-    def test_find_bash_run_pid(self, m_run, caplog):
+    def test_bash_pgrep_cmd(self, caplog):
         run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
-        m_run.return_value = Mock(stdout="4343")
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO._find_run_pid(run_info)
+        cmd = watch_NEMO._pgrep_cmd(run_info)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = 'searching processes for "bash SalishSeaNEMO.sh"'
         assert caplog.records[0].message == expected
-        assert m_run.call_args_list == [
-            call(
-                ["pgrep", "--newest", "--exact", "--full", "bash SalishSeaNEMO.sh"],
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True,
-            )
+        assert cmd == [
+            "pgrep",
+            "--newest",
+            "--exact",
+            "--full",
+            "bash SalishSeaNEMO.sh",
         ]
 
 
