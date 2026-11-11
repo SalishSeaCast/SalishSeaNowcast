@@ -149,7 +149,9 @@ def grib_to_netcdf(parsed_args, config, *args):
                 config,
                 first_step_is_offset=False,
             )
-            nemo_ds = xarray.combine_by_coords((nemo_ds_18, nemo_ds_00, nemo_ds_12))
+            nemo_ds = xarray.combine_by_coords(
+                (nemo_ds_18, nemo_ds_00, nemo_ds_12), compat="no_conflicts"
+            )
             nc_file = _write_netcdf(nemo_ds, run_date, run_date, run_type, config)
             _update_checklist(nc_file, checklist)
 
@@ -276,7 +278,7 @@ def _calc_nemo_ds(
             config,
         )
     nemo_ds = xarray.combine_by_coords(
-        nemo_datasets.values(), combine_attrs="drop_conflicts"
+        nemo_datasets.values(), compat="no_conflicts", combine_attrs="drop_conflicts"
     )
     nemo_ds = _calc_earth_ref_winds(nemo_ds)
     nemo_ds = _apportion_accumulation_vars(nemo_ds, first_step_is_offset, config)

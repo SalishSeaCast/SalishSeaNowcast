@@ -78,7 +78,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
     monkeypatch.setattr(grib_to_netcdf, "NowcastWorker", mock_nowcast_worker)
 
 
-class TestGirdIndices:
+class TestGridIndices:
     """Unit tests for module variables that define indices of sub-region grid that is extracted."""
 
     def test_SandHeads_indices(self):
