@@ -23,12 +23,11 @@ import subprocess
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
 import pytest
-from nemo_nowcast import NowcastWorker, Message
+from nemo_nowcast import Message
 
 from nowcast.workers import watch_NEMO
 
@@ -190,36 +189,55 @@ class TestFailure:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.watch_NEMO._find_run_pid", autospec=True)
-@patch("nowcast.workers.watch_NEMO._pid_exists", autospec=True)
-@patch("nowcast.workers.watch_NEMO.f90nml.read", autospec=True)
-@patch(
-    "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
-)
 class TestWatchNEMO:
     """Unit tests for watch_NEMO function."""
 
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_find_run_pid(monkeypatch):
+        def _mock_find_run_pid(run_info):
+            return 4343
+
+        monkeypatch.setattr(watch_NEMO, "_find_run_pid", _mock_find_run_pid)
+
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_pid_exists(monkeypatch):
+        def _mock_pid_exists(pid):
+            return False
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", _mock_pid_exists)
+
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_confirm_run_success(monkeypatch):
+        def _mock_confirm_run_success(
+            host_name, run_type, run_date, run_dir, itend, restart_timestep, config
+        ):
+            return True
+
+        monkeypatch.setattr(
+            watch_NEMO, "_confirm_run_success", _mock_confirm_run_success
+        )
+
     def test_checklist(
         self,
-        m_confirm,
-        m_nml_read,
-        m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
         caplog,
+        monkeypatch,
     ):
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
-        m_pid_exists.return_value = False
-        m_find_run_pid.return_value = 4343
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+        def mock_read(nml_file):
+            return {
+                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -229,11 +247,12 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         caplog.set_level(logging.DEBUG)
 
-        checklist = watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        checklist = watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = f"{run_type} on {host_name}: run pid: 4343"
@@ -245,26 +264,30 @@ class TestWatchNEMO:
 
     def test_time_step_not_found(
         self,
-        m_confirm,
-        m_nml_read,
-        m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
-        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
-        m_pid_exists.side_effect = (True, False)
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+        pid_exists = iter((True, False))
+
+        def mock_pid_exists(pid):
+            return next(pid_exists)
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
+
+        def mock_read(nml_file):
+            return {
+                "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -274,12 +297,14 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         watch_NEMO.POLL_INTERVAL = 0
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[1].levelname == "INFO"
         expected = (
@@ -290,33 +315,35 @@ class TestWatchNEMO:
 
     def test_time_step_found(
         self,
-        m_confirm,
-        m_nml_read,
-        m_pid_exists,
-        m_find_run_pid,
         run_type,
         host_name,
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
-        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        time_step = tmp_run_dir.ensure("time.step")
-        time_step.write("1081\n")
-        m_nml_read.return_value = {
-            "namrun": {
-                "nn_it000": 1,
-                "nn_itend": 2160,
-                "nn_date0": 20_171_113,
-                "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
-            },
-            "namdom": {"rn_rdt": 40},
-        }
-        m_pid_exists.side_effect = (True, False)
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
+        pid_exists = iter((True, False))
+
+        def mock_pid_exists(pid):
+            return next(pid_exists)
+
+        monkeypatch.setattr(watch_NEMO, "_pid_exists", mock_pid_exists)
+
+        def mock_read(nml_file):
+            return {
+                "namrun": {
+                    "nn_it000": 1,
+                    "nn_itend": 2160,
+                    "nn_date0": 20_171_113,
+                    "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
+                },
+                "namdom": {"rn_rdt": 40},
+            }
+
+        monkeypatch.setattr(watch_NEMO.f90nml, "read", mock_read)
+
+        def mock_tell_manager(msg_type, payload):
+            return Message(
                 "manager",
                 "ack",
                 payload={
@@ -326,12 +353,16 @@ class TestWatchNEMO:
                         "run date": "2017-11-13",
                     }
                 },
-            ),
-        )
+            )
+
+        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        time_step = tmp_run_dir.ensure("time.step")
+        time_step.write("1081\n")
+        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         watch_NEMO.POLL_INTERVAL = 0
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, mock_tell_manager)
 
         assert caplog.records[1].levelname == "INFO"
         expected = (
@@ -340,92 +371,80 @@ class TestWatchNEMO:
         )
         assert caplog.records[1].message == expected
 
-    def test_confirm_run_success(
-        self,
-        m_confirm,
-        m_nml_read,
-        m_pid_exists,
-        m_find_run_pid,
-        run_type,
-        host_name,
-        config,
-        caplog,
-    ):
-        m_nml_read.return_value = {
-            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
-            "namdom": {"rn_rdt": 40},
-        }
-        m_pid_exists.return_value = False
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        tell_manager = Mock(
-            spec=NowcastWorker.tell_manager,
-            return_value=Message(
-                "manager",
-                "ack",
-                payload={
-                    run_type: {
-                        "run dir": "tmp_run_dir",
-                        "run exec cmd": "bash SalishSeaNEMO.sh",
-                        "run date": "2017-11-13",
-                    }
-                },
-            ),
-        )
-        caplog.set_level(logging.DEBUG)
 
-        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
-
-        m_confirm.assert_called_once_with(
-            host_name,
-            run_type,
-            arrow.get("2017-11-13"),
-            Path("tmp_run_dir"),
-            2160,
-            2160,
-            config,
-        )
-
-
-@patch("nowcast.workers.watch_NEMO.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit tests for _find_run_pid() function."""
 
-    def test_find_qsub_run_pid(self, m_run, caplog):
+    @pytest.fixture(autouse=True)
+    @staticmethod
+    def mock_pgrep_cmd(monkeypatch):
+        def _mock_pgrep_cmd(run_info):
+            return ["pgrep", "4343"]
+
+        monkeypatch.setattr(watch_NEMO, "_pgrep_cmd", _mock_pgrep_cmd)
+
+    def test_find_run_pid(self, monkeypatch):
+        def mock_run(cmd, stdout, check, universal_newlines):
+            return SimpleNamespace(stdout="4343")
+
+        monkeypatch.setattr(watch_NEMO.subprocess, "run", mock_run)
+
+        run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
+        pid = watch_NEMO._find_run_pid(run_info)
+
+        assert pid == 4343
+
+    def test_find_run_pid_process_not_spawned(self, monkeypatch):
+        run_results = iter(
+            (
+                subprocess.CalledProcessError(1, ["pgrep", "4343"]),
+                SimpleNamespace(stdout="4343"),
+            )
+        )
+
+        def mock_run(cmd, stdout, check, universal_newlines):
+            res = next(run_results)
+            if isinstance(res, Exception):
+                raise res
+            return res
+
+        monkeypatch.setattr(watch_NEMO.subprocess, "run", mock_run)
+
+        run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
+        pid = watch_NEMO._find_run_pid(run_info)
+
+        assert pid == 4343
+
+
+class TestPgrepCmd:
+    """Unit tests for _pgrep_cmd() function."""
+
+    def test_qsub_pgrep_cmd(self, caplog):
         run_info = {"run exec cmd": "qsub SalishSeaNEMO.sh", "run id": "4446.master"}
-        m_run.return_value = Mock(stdout="4446")
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO._find_run_pid(run_info)
+        cmd = watch_NEMO._pgrep_cmd(run_info)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = "searching processes for 4446.master"
         assert caplog.records[0].message == expected
-        assert m_run.call_args_list == [
-            call(
-                ["pgrep", "4446.master"],
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True,
-            )
-        ]
+        assert cmd == ["pgrep", "4446.master"]
 
-    def test_find_bash_run_pid(self, m_run, caplog):
+    def test_bash_pgrep_cmd(self, caplog):
         run_info = {"run exec cmd": "bash SalishSeaNEMO.sh", "run id": None}
-        m_run.return_value = Mock(stdout="4343")
         caplog.set_level(logging.DEBUG)
 
-        watch_NEMO._find_run_pid(run_info)
+        cmd = watch_NEMO._pgrep_cmd(run_info)
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = 'searching processes for "bash SalishSeaNEMO.sh"'
         assert caplog.records[0].message == expected
-        assert m_run.call_args_list == [
-            call(
-                ["pgrep", "--newest", "--exact", "--full", "bash SalishSeaNEMO.sh"],
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True,
-            )
+        assert cmd == [
+            "pgrep",
+            "--newest",
+            "--exact",
+            "--full",
+            "bash SalishSeaNEMO.sh",
         ]
 
 
@@ -440,35 +459,62 @@ class TestPidExists:
         with pytest.raises(ValueError):
             watch_NEMO._pid_exists(0)
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", return_value=None, autospec=True)
-    def test_pid_exists(self, m_kill):
+    def test_pid_exists(self, monkeypatch):
+        def mock_kill(pid, sig):
+            return None
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch(
-        "nowcast.workers.watch_NEMO.os.kill",
-        side_effect=ProcessLookupError,
-        autospec=True,
-    )
-    def test_no_such_pid(self, m_kill):
+    def test_no_such_pid(self, monkeypatch):
+        def mock_kill(pid, sig):
+            raise ProcessLookupError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists
 
-    @patch(
-        "nowcast.workers.watch_NEMO.os.kill", side_effect=PermissionError, autospec=True
-    )
-    def test_pid_permission_error(self, m_kill):
+    def test_pid_permission_error(self, monkeypatch):
+        def mock_kill(pid, sig):
+            raise PermissionError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=OSError, autospec=True)
-    def test_oserror(self, m_kill):
+    def test_oserror(self, monkeypatch):
+        def mock_kill(pid, sig):
+            raise OSError()
+
+        monkeypatch.setattr(watch_NEMO.os, "kill", mock_kill)
         with pytest.raises(OSError):
             watch_NEMO._pid_exists(42)
 
 
 class TestConfirmRunSuccess:
     """Unit tests for _confirm_run_success() function."""
+
+    @staticmethod
+    def prep_files(
+        run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+    ):
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]["run types"][
+            run_type
+        ]
+        results_dir = tmp_path / run_date.format("DDMMMYY").lower()
+        results_dir.mkdir(parents=True, exist_ok=True)
+        monkeypatch.setitem(host_config, "results", str(tmp_path))
+
+        (results_dir / "time.step").write_text(f"{itend}\n")
+        (results_dir / f"SalishSea_{restart_timestep:08d}_restart.nc").touch()
+        if run_type == "nowcast-green":
+            (results_dir / f"SalishSea_{restart_timestep:08d}_restart_trc.nc").touch()
+        (results_dir / "ocean.output").touch()
+        (results_dir / "solver.stat").touch()
+        if run_type == "nowcast-green":
+            (results_dir / "tracer.stat").touch()
+        return results_dir
 
     @pytest.mark.parametrize(
         "run_type, itend, restart_timestep",
@@ -480,23 +526,32 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_run_succeeded(
-        self, run_type, itend, restart_timestep, config, caplog, tmpdir
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert run_succeeded
 
@@ -509,25 +564,47 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_results_dir(self, run_type, itend, restart_timestep, config, caplog):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (False, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                caplog.set_level(logging.DEBUG)
+    def test_no_results_dir(
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        run_date = arrow.get("2017-11-16")
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]["run types"][
+            run_type
+        ]
+        results_dir = tmp_path / "results" / run_date.format("DDMMMYY").lower()
+        monkeypatch.setitem(host_config, "results", str(tmp_path / "results"))
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        (tmp_run_dir / "time.step").write_text(f"{itend}\n")
+        (tmp_run_dir / f"SalishSea_{restart_timestep:08d}_restart.nc").touch()
+        if run_type == "nowcast-green":
+            (tmp_run_dir / f"SalishSea_{restart_timestep:08d}_restart_trc.nc").touch()
+        (tmp_run_dir / "ocean.output").touch()
+        (tmp_run_dir / "solver.stat").touch()
+        if run_type == "nowcast-green":
+            (tmp_run_dir / "tracer.stat").touch()
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        caplog.set_level(logging.DEBUG)
+
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
-        expected = f"No results directory for arbutus.cloud run: results/SalishSea/{run_type}/16nov17"
+        expected = f"No results directory for arbutus.cloud run: {results_dir}"
         assert caplog.records[0].message == expected
         assert not run_succeeded
 
@@ -547,29 +624,33 @@ class TestConfirmRunSuccess:
         restart_timestep,
         config,
         caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, True, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "output.abort.nc").touch()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud {run_type}/16nov17 run aborted: "
-            f"results/SalishSea/{run_type}/16nov17/output.abort.nc"
+            f'{results_dir / "output.abort.nc"}'
         )
-
         assert caplog.records[0].message == expected
         assert not run_succeeded
 
@@ -582,22 +663,34 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_time_step_file(self, run_type, itend, restart_timestep, config, caplog):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open.side_effect = FileNotFoundError
-                caplog.set_level(logging.DEBUG)
+    def test_no_time_step_file(
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "time.step").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = f"arbutus.cloud {run_type}/16nov17 run failed; no time.step file"
@@ -614,23 +707,33 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_wrong_final_time_step(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = "43\n"
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "time.step").write_text("43\n")
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
@@ -650,56 +753,75 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_no_physics_restart_file(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, False, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / f"SalishSea_{restart_timestep:08d}_restart.nc").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud {run_type}/16nov17 run failed; "
             f"no physics restart file: "
-            f"results/SalishSea/{run_type}/16nov17/SalishSea_{restart_timestep:08d}_restart.nc"
+            f"{results_dir / f'SalishSea_{restart_timestep:08d}_restart.nc'}"
         )
         assert caplog.records[0].message == expected
         assert not run_succeeded
 
-    def test_no_tracers_restart_file(self, config, caplog):
+    def test_no_tracers_restart_file(self, config, caplog, tmp_path, monkeypatch):
         restart_timestep = 2160
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, False)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = "2160\n"
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            "nowcast-green",
+            run_date,
+            2160,
+            restart_timestep,
+            config,
+            tmp_path,
+            monkeypatch,
+        )
+        (results_dir / f"SalishSea_{restart_timestep:08d}_restart_trc.nc").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    "nowcast-green",
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    2160,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            "nowcast-green",
+            run_date,
+            tmp_run_dir,
+            2160,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud nowcast-green/16nov17 run failed; "
             f"no tracers restart file: "
-            f"results/SalishSea/nowcast-green/16nov17/SalishSea_{restart_timestep:08d}_restart_trc.nc"
+            f"{results_dir / f'SalishSea_{restart_timestep:08d}_restart_trc.nc'}"
         )
         assert caplog.records[0].message == expected
         assert not run_succeeded
@@ -714,27 +836,37 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_no_ocean_output_file(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open.side_effect = FileNotFoundError
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "ocean.output").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
-        assert caplog.records[1].levelname == "CRITICAL"
+        assert caplog.records[0].levelname == "CRITICAL"
         expected = f"arbutus.cloud {run_type}/16nov17 run failed; no ocean.output file"
-        assert caplog.records[1].message == expected
+        assert caplog.records[0].message == expected
         assert not run_succeeded
 
     @pytest.mark.parametrize(
@@ -747,29 +879,38 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_error_in_ocean_output(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                m_open().__enter__().__iter__.return_value = ["foo E R R O R bar\n"]
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "ocean.output").write_text("foo E R R O R bar\n")
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud {run_type}/16nov17 run failed; "
-            f"1 or more E R R O R in: results/SalishSea/{run_type}/16nov17/ocean.output"
+            f'1 or more E R R O R in: {results_dir / "ocean.output"}'
         )
         assert caplog.records[0].message == expected
         assert not run_succeeded
@@ -784,27 +925,37 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_no_solver_stat_file(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open.side_effect = FileNotFoundError
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "solver.stat").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
-        assert caplog.records[2].levelname == "CRITICAL"
+        assert caplog.records[0].levelname == "CRITICAL"
         expected = f"arbutus.cloud {run_type}/16nov17 run failed; no solver.stat file"
-        assert caplog.records[2].message == expected
+        assert caplog.records[0].message == expected
         assert not run_succeeded
 
     @pytest.mark.parametrize(
@@ -817,87 +968,99 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_nan_in_solver_stat(
-        self, run_type, itend, restart_timestep, config, caplog
+        self,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = f"{itend}\n"
-                m_open().__enter__().__iter__.return_value = (
-                    "foo bar\n",
-                    "it : 43 ssh2: NaN Umax: 0.2450101238E+01\n",
-                )
-                caplog.set_level(logging.DEBUG)
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            run_type, run_date, itend, restart_timestep, config, tmp_path, monkeypatch
+        )
+        (results_dir / "solver.stat").write_text(
+            "foo bar\n" "it : 43 ssh2: NaN Umax: 0.2450101238E+01\n"
+        )
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    run_type,
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    itend,
-                    restart_timestep,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            run_type,
+            run_date,
+            tmp_run_dir,
+            itend,
+            restart_timestep,
+            config,
+        )
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud {run_type}/16nov17 run failed; "
-            f"NaN in: results/SalishSea/{run_type}/16nov17/solver.stat"
+            f'NaN in: {results_dir / "solver.stat"}'
         )
         assert caplog.records[0].message == expected
         assert not run_succeeded
 
-    def test_nan_in_tracer_stat(self, config, caplog):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = "2160\n"
-                m_open().__enter__().__iter__.return_value = (
-                    "foo bar\n",
-                    "it : 43 ssh2: 0.8313118488E+05 Umax: 0.2450101238E+01\n"
-                    "43  NaN\n",
-                )
-                caplog.set_level(logging.DEBUG)
+    def test_nan_in_tracer_stat(self, config, caplog, tmp_path, monkeypatch):
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            "nowcast-green", run_date, 2160, 2160, config, tmp_path, monkeypatch
+        )
+        (results_dir / "tracer.stat").write_text(
+            "foo bar\n"
+            "it : 43 ssh2: 0.8313118488E+05 Umax: 0.2450101238E+01\n"
+            "43  NaN\n"
+        )
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    "nowcast-green",
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    2160,
-                    2160,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            "nowcast-green",
+            run_date,
+            tmp_run_dir,
+            2160,
+            2160,
+            config,
+        )
 
-        assert caplog.records[1].levelname == "CRITICAL"
+        assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud nowcast-green/16nov17 run failed; "
-            f"NaN in: results/SalishSea/nowcast-green/16nov17/tracer.stat"
+            f'NaN in: {results_dir / "tracer.stat"}'
         )
-        assert caplog.records[1].message == expected
+        assert caplog.records[0].message == expected
         assert not run_succeeded
 
-    def test_no_tracer_stat_file(self, config, caplog):
-        with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
-            m_exists.side_effect = (True, False, True, True)
-            with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
-                m_open().__enter__().read.return_value = "2160\n"
-                m_open.side_effect = FileNotFoundError
-                caplog.set_level(logging.DEBUG)
+    def test_no_tracer_stat_file(self, config, caplog, tmp_path, monkeypatch):
+        run_date = arrow.get("2017-11-16")
+        results_dir = self.prep_files(
+            "nowcast-green", run_date, 2160, 2160, config, tmp_path, monkeypatch
+        )
+        (results_dir / "tracer.stat").unlink()
+        tmp_run_dir = tmp_path / "tmp_run_dir"
+        tmp_run_dir.mkdir()
+        caplog.set_level(logging.DEBUG)
 
-                run_succeeded = watch_NEMO._confirm_run_success(
-                    "arbutus.cloud",
-                    "nowcast-green",
-                    arrow.get("2017-11-16"),
-                    Path("tmp_run_dir"),
-                    2160,
-                    2160,
-                    config,
-                )
+        run_succeeded = watch_NEMO._confirm_run_success(
+            "arbutus.cloud",
+            "nowcast-green",
+            run_date,
+            tmp_run_dir,
+            2160,
+            2160,
+            config,
+        )
 
-        assert caplog.records[3].levelname == "CRITICAL"
+        assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"arbutus.cloud nowcast-green/16nov17 run failed; no tracer.stat file"
         )
-        assert caplog.records[3].message == expected
+        assert caplog.records[0].message == expected
         assert not run_succeeded

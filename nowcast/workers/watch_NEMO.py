@@ -129,14 +129,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
 
 
 def _find_run_pid(run_info):
-    if run_info["run exec cmd"].startswith("qsub"):
-        torque_id = run_info["run id"]
-        cmd = shlex.split(f"pgrep {torque_id}")
-        logger.debug(f"searching processes for {torque_id}")
-    else:
-        run_exec_cmd = run_info["run exec cmd"]
-        cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
-        logger.debug(f'searching processes for "{run_exec_cmd}"')
+    cmd = _pgrep_cmd(run_info)
     pid = None
     while pid is None:
         try:
@@ -148,6 +141,18 @@ def _find_run_pid(run_info):
             # Process has not yet been spawned
             pass
     return pid
+
+
+def _pgrep_cmd(run_info):
+    if run_info["run exec cmd"].startswith("qsub"):
+        torque_id = run_info["run id"]
+        cmd = shlex.split(f"pgrep {torque_id}")
+        logger.debug(f"searching processes for {torque_id}")
+    else:
+        run_exec_cmd = run_info["run exec cmd"]
+        cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
+        logger.debug(f'searching processes for "{run_exec_cmd}"')
+    return cmd
 
 
 def _pid_exists(pid):
