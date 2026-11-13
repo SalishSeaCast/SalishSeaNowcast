@@ -19,7 +19,7 @@
 """Functions to calculate lists of workers to launch after previous workers
 end their work.
 
-Function names **must** be of the form :py:func:`after_worker_name`.
+Function names **must** be of the form ``after_worker_name``.
 """
 
 from pathlib import Path
@@ -1599,7 +1599,7 @@ def after_ping_erddap(msg, config, checklist):
     if msg.type == "success wwatch3-forecast":
         try:
             run_types = checklist["WWATCH3 run"].keys()
-            run_type = "forecast" if "forecast" in run_types else "forecast2"
+            run_type = "forecast2" if "forecast2" in run_types else "forecast"
             run_date = checklist["WWATCH3 run"][run_type]["run date"]
         except KeyError:
             # Handling for the occasional occurrence of missing "WWATCH3 run" item in checklist
