@@ -19,7 +19,7 @@
 """Functions to calculate lists of workers to launch after previous workers
 end their work.
 
-Function names **must** be of the form :py:func:`after_worker_name`.
+Function names **must** be of the form ``after_worker_name``.
 """
 
 from pathlib import Path
