@@ -48,8 +48,9 @@ Start the nowcast system and sarracenia client with:
 
 .. code-block:: console
 
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ supervisord --configuration $NOWCAST_CONFIG/supervisord.ini
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ source .env
+    $ pixi run supervisord --configuration $NOWCAST_CONFIG/supervisord.ini
 
 :command:`supervisord` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
 
@@ -58,8 +59,9 @@ Start it with:
 
 .. code-block:: console
 
-    $ source activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env)$ supervisord --configuration $SALISHSEA_SITE/supervisord-prod.ini
+    $ cd /SalishSeaCast/salishsea-site
+    $ source .env
+    $ pixi run supervisord --configuration $SALISHSEA_SITE/supervisord-prod.ini
 
 
 System Management
@@ -70,8 +72,9 @@ Start it with:
 
 .. code-block:: console
 
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ source .env
+    $ pixi run supervisord --configuration $NOWCAST_CONFIG/supervisord.ini
 
 .. _supervisorctl: https://supervisord.org/running.html#running-supervisorctl
 
@@ -104,14 +107,15 @@ Use :command:`supervisorctl` to view the :command:`sr_subscribe` log files:\
 
 .. code-block:: console
 
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini tail sr_subscribe-hrdps-west
+    $ cd /SalishSeaCast/SalishSeaNowcast
+    $ source .env
+    $ pixi run supervisord --configuration $NOWCAST_CONFIG/supervisord.ini tail sr_subscribe-hrdps-west
 
 or
 
 .. code-block:: console
 
-    (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini tail sr_subscribe-hydrometric
+    $ pixi run supervisord --configuration $NOWCAST_CONFIG/supervisord.ini  tail sr_subscribe-hydrometric
 
 Use :command:`tail -f` to follow the logs to view updates as they occur.
 

@@ -143,10 +143,10 @@ a :command:`pixi run -e sarracenia ...` command is used,
 or a :command:`pixi shell -e sarracenia` sub-shell is started.
 
 
-:file:`/SalishSeaCast/salishsea-site/.env-template`
----------------------------------------------------
+:file:`/SalishSeaCast/salishsea-site/.env-skookum`
+--------------------------------------------------
 
-Copy the :file:`/SalishSeaCast/salishsea-site/.env-template` file as
+Copy the :file:`/SalishSeaCast/salishsea-site/.env-skookum` file as
 :file:`/SalishSeaCast/salishsea-site/.env` and edit it to add:
 
 * the token for the debug log page as the value in the ``export NOWCAST_DEBUG_LOG_TOKEN=...`` line
