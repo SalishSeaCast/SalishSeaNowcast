@@ -95,9 +95,9 @@ Testing the Website View
 
    .. code-block:: console
 
-       (nowcast-fig-dev)$ export NOWCAST_LOGS=/tmp/$USER
-       (nowcast-fig-dev)$ export NOWCAST_ENV=$CONDA_PREFIX
-       (nowcast-fig-dev)$ mkdir -p $NOWCAST_LOGS
+       $ export NOWCAST_LOGS=/tmp/$USER
+       $ export NOWCAST_ENV=$CONDA_PREFIX
+       $ mkdir -p $NOWCAST_LOGS
 
    and run the :py:mod:`make_plots` worker to render the figures of the type that you are working on for a recent date
    (like yesterday).
@@ -114,7 +114,7 @@ Testing the Website View
    .. code-block:: console
 
        $ cd salishsea-site/
-       $ pserve --reload development.ini
+       $ pixi run pserve --reload development.ini
 
    You should see output like:
 
