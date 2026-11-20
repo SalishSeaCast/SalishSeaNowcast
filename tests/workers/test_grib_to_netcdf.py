@@ -233,16 +233,16 @@ class TestFailure:
 class TestGribToNetcdf:
     """Unit test for grib_to_netcdf() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_open_dataset(monkeypatch):
         def _mock_open_dataset(path):
             pass
 
         monkeypatch.setattr(grib_to_netcdf.xarray, "open_dataset", _mock_open_dataset)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_nemo_var_ds(monkeypatch):
         def _mock_calc_nemo_var_ds(
             msc_var,
@@ -258,8 +258,8 @@ class TestGribToNetcdf:
 
         monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", _mock_calc_nemo_var_ds)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_combine_by_coords(monkeypatch):
         def _mock_combine_by_coords(data_objects, **kwargs):
             return xarray.Dataset(
@@ -270,8 +270,8 @@ class TestGribToNetcdf:
             grib_to_netcdf.xarray, "combine_by_coords", _mock_combine_by_coords
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_earth_ref_winds(monkeypatch):
         def _mock_calc_earth_ref_winds(nemo_ds):
             pass
@@ -280,8 +280,8 @@ class TestGribToNetcdf:
             grib_to_netcdf, "_calc_earth_ref_winds", _mock_calc_earth_ref_winds
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_apportion_accumulation_vars(monkeypatch):
         def _mock_apportion_accumulation_vars(nemo_ds, first_step_is_offset, config):
             return xarray.Dataset(
@@ -294,16 +294,16 @@ class TestGribToNetcdf:
             _mock_apportion_accumulation_vars,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_to_netcdf(monkeypatch):
         def _mock_to_netcdf(nemo_ds, encoding, nc_file_path):
             pass
 
         monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", _mock_to_netcdf)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_improve_metadata(monkeypatch):
         def _mock_improve_metadata(nemo_ds, config):
             pass
@@ -538,8 +538,8 @@ class TestCalcGridAngle:
 class TestImproveMetadata:
     """Unit test for _improve_metadata() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def nemo_ds():
         mock_var_da = xarray.DataArray(
             data=numpy.empty(shape=(1, 1, 1)),
@@ -815,8 +815,8 @@ class TestApportionAccumulationVars:
 class TestWriteNetcdf:
     """Unit tests for _write_netcdf() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_to_netcdf(monkeypatch):
         def _mock_to_netcdf(nemo_ds, encoding, nc_file_path):
             pass

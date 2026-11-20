@@ -155,8 +155,8 @@ class TestFailure:
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_create_LiveOcean_TS_BCs(config, monkeypatch):
         def _mock_create_LiveOcean_TS_BCs(
             date,

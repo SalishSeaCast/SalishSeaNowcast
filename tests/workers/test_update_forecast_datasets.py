@@ -211,8 +211,8 @@ class TestFailure:
 class TestUpdateForecastDatasets:
     """Unit tests for update_forecast_datasets() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_symlink_most_recent_forecast(monkeypatch):
         def mock_symlink_most_recent_forecast(
             run_date, most_recent_fcst_dir, model, run_type, config
@@ -225,8 +225,8 @@ class TestUpdateForecastDatasets:
             mock_symlink_most_recent_forecast,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_update_rolling_forecast(monkeypatch):
         def mock_update_rolling_forecast(
             run_date, forecast_dir, model, run_type, config

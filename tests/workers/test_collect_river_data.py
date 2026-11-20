@@ -238,8 +238,8 @@ class TestFailure:
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_eccc_day_avg_discharge(monkeypatch):
         def _mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
             return 12345.6
@@ -250,8 +250,8 @@ class TestCollectRiverData:
             _mock_calc_eccc_day_avg_discharge,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_get_usgs_day_avg_discharge(monkeypatch):
         def _mock_get_usgs_day_avg_discharge(river_name, data_date, config):
             return 12345.6
@@ -262,8 +262,8 @@ class TestCollectRiverData:
             _mock_get_usgs_day_avg_discharge,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_missing_eccc_day_avg_discharge(monkeypatch):
         def _mock_missing_eccc_day_avg_discharge(river_name, data_date, config):
             return numpy.nan
@@ -274,8 +274,8 @@ class TestCollectRiverData:
             _mock_missing_eccc_day_avg_discharge,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_missing_usgs_day_avg_discharge(monkeypatch):
         def _mock_missing_usgs_day_avg_discharge(river_name, data_date, config):
             return numpy.nan

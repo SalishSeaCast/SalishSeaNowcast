@@ -246,8 +246,8 @@ class TestFailure:
 class TestCropGribs:
     """Unit tests for crop_gribs() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_grib_file_paths(monkeypatch):
         def _mock_calc_grib_file_paths(*args):
             return set()
@@ -256,8 +256,8 @@ class TestCropGribs:
             crop_gribs, "_calc_grib_file_paths", _mock_calc_grib_file_paths
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_observer(monkeypatch):
         class MockObserver:
             def schedule(self, event_handler, path, recursive):
@@ -274,8 +274,8 @@ class TestCropGribs:
 
         monkeypatch.setattr(crop_gribs.watchdog.observers, "Observer", MockObserver)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_write_ssc_grib_file(monkeypatch):
         def _mock_write_ssc_grib_file(eccc_grib_file, config):
             pass
@@ -514,8 +514,8 @@ class TestCalcGribFilePaths:
 class TestWriteSscGribFile:
     """Unit test for _write_ssc_grib_file() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_open_dataset(monkeypatch):
         def _mock_open_dataset(path, engine, backend_kwargs):
             class Mock_open_dataset:
@@ -536,8 +536,8 @@ class TestWriteSscGribFile:
 
         monkeypatch.setattr(crop_gribs.xarray, "open_dataset", _mock_open_dataset)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_xarray_to_grib(monkeypatch):
         def _mock_xarray_to_grib(ssc_ds, ssc_grib_file):
             pass
