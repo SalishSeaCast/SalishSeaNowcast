@@ -52,6 +52,7 @@
   - Avoid overly verbose descriptions or unnecessary details.
 
 ## Git Worktree Workflow
+Always work on a descriptively named branch, rather than working directly on `main`.
 For non-trivial changes (new features, bug fixes, complex refactors):
 1. Create a new Git worktree inside `.worktrees/` at the project root, rather than working directly in the main checkout.
 2. Name the branch descriptively (e.g., `feature/auth-refactor`, `fix/data-loading`).
