@@ -63,3 +63,4 @@ For non-trivial changes (new features, bug fixes, complex refactors):
 ## Safety & Constraints
 - **Lockfile Integrity:** Do not edit `pixi.lock` manually. If `pyproject.toml` changes, run `pixi install` to re-sync.
 - **Environment Isolation:** Do not suggest creating global virtual environments (`venv` or `virtualenv`) or standard Conda environments.
+- **Production Forcing & Remote Operations:** Never trigger actual remote server rsync/SSH or external transfers during test runs; use unit test configurations and stubs.
