@@ -48,7 +48,7 @@
 - **Commit message format:**
   - Start with a short imperative sentence (≤50 characters, no period).
   - Leave a blank line.
-  - Follow with a detailed explanation of 2–3 sentences maximum.
+  - Follow with a detailed explanation of 2–3 sentences maximum, or a bullet list.
   - Avoid overly verbose descriptions or unnecessary details.
 
 ## Git Worktree Workflow
