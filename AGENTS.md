@@ -13,7 +13,9 @@
    - Add new dependencies: `pixi add <package_name>`
    - Add dev dependencies: `pixi add --feature dev <package_name>`
    - Execute project tasks: `pixi run <task_name>`
+   - Check code formatting: `pixi run -e dev lint`
    - Run tests: `pixi run -e dev pytest` — extra arguments can be appended (e.g. a specific test name or directory).
+   - Consolidated code formatting check and test suite run: `pixi run -e dev check`
    - Run GitHub CLI commands: `pixi run -e dev gh <command>`
 
 ## Directory Layout
@@ -29,8 +31,8 @@
 - `pyproject.toml`: Canonical source of truth for dependencies and project tasks.
 
 ## Code Style
-- **Formatter:** Code is formatted with [black](https://black.readthedocs.io/), enforced via [pre-commit](https://pre-commit.com/) hooks.
-- Ensure any code changes conform to black formatting before committing.
+- **Formatter:** Code formating is enforced via [pre-commit](https://pre-commit.com/) hooks.
+- Ensure any code changes conform to code formatting check before committing.
 
 ## Git Commits
 - **Only commit when explicitly asked** by the user — do not commit automatically.
