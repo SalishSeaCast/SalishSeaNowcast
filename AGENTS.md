@@ -13,9 +13,11 @@
    - Add new dependencies: `pixi add <package_name>`
    - Add dev dependencies: `pixi add --feature dev <package_name>`
    - Execute project tasks: `pixi run <task_name>`
-   - Check code formatting: `pixi run -e dev lint`
-   - Run tests: `pixi run -e dev pytest` — extra arguments can be appended (e.g. a specific test name or directory).
+   - Check code formatting & lintng: `pixi run -e dev lint`
+   - Run test suite: `pixi run -e dev pytest` (extra arguments can be appended, e.g. `-n0 tests/test_config.py` for serial single-file debugging).
    - Consolidated code formatting check and test suite run: `pixi run -e dev check`
+   - Build documentation: `pixi run -e docs docs`
+   - Check documentation links: `pixi run -e docs linkcheck`
    - Run GitHub CLI commands: `pixi run -e dev gh <command>`
 
 ## Directory Layout
@@ -31,7 +33,7 @@
 - `pyproject.toml`: Canonical source of truth for dependencies and project tasks.
 
 ## Code Style
-- **Formatter:** Code formating is enforced via [pre-commit](https://pre-commit.com/) hooks.
+- **Formatter & Linters:** Code formating is enforced via [pre-commit](https://pre-commit.com/) hooks.
 - Ensure any code changes conform to code formatting check before committing.
 ### Unit Tests
 1. **Pytest Fixtures over Mocks**: Prefer `monkeypatch` and `tmp_path` fixtures over `unittest.mock.patch`
