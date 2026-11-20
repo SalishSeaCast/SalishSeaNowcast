@@ -13,7 +13,11 @@
    - Add new dependencies: `pixi add <package_name>`
    - Add dev dependencies: `pixi add --feature dev <package_name>`
    - Execute project tasks: `pixi run <task_name>`
-   - Run tests: `pixi run -e dev pytest` — extra arguments can be appended (e.g. a specific test name or directory).
+   - Check code formatting & lintng: `pixi run -e dev lint`
+   - Run test suite: `pixi run -e dev pytest` (extra arguments can be appended, e.g. `-n0 tests/test_config.py` for serial single-file debugging).
+   - Consolidated code formatting check and test suite run: `pixi run -e dev check`
+   - Build documentation: `pixi run -e docs docs`
+   - Check documentation links: `pixi run -e docs linkcheck`
    - Run GitHub CLI commands: `pixi run -e dev gh <command>`
 
 ## Directory Layout
@@ -29,18 +33,28 @@
 - `pyproject.toml`: Canonical source of truth for dependencies and project tasks.
 
 ## Code Style
-- **Formatter:** Code is formatted with [black](https://black.readthedocs.io/), enforced via [pre-commit](https://pre-commit.com/) hooks.
-- Ensure any code changes conform to black formatting before committing.
+- **Formatter & Linters:** Code formating is enforced via [pre-commit](https://pre-commit.com/) hooks.
+- Ensure any code changes conform to code formatting check before committing.
+### Unit Tests
+1. **Pytest Fixtures over Mocks**: Prefer `monkeypatch` and `tmp_path` fixtures over `unittest.mock.patch`
+   decorators or context managers.
+2. **Real File Operations in Tests**: Use `tmp_path` and real file creation/inspection instead of mocking
+   `pathlib.Path.exists` and `pathlib.Path.open`.
+3. **Autouse Fixtures**: Consolidate repetitive monkeypatching across test classes into class-level
+   `@staticmethod` autouse fixtures.
+4. **Callable Stubs**: Prefer simple local callable functions over `unittest.mock.Mock` instances
+   for simple return-value stubs.
 
 ## Git Commits
 - **Only commit when explicitly asked** by the user — do not commit automatically.
 - **Commit message format:**
   - Start with a short imperative sentence (≤50 characters, no period).
   - Leave a blank line.
-  - Follow with a detailed explanation of 2–3 sentences maximum.
+  - Follow with a detailed explanation of 2–3 sentences maximum, or a bullet list.
   - Avoid overly verbose descriptions or unnecessary details.
 
 ## Git Worktree Workflow
+Always work on a descriptively named branch, rather than working directly on `main`.
 For non-trivial changes (new features, bug fixes, complex refactors):
 1. Create a new Git worktree inside `.worktrees/` at the project root, rather than working directly in the main checkout.
 2. Name the branch descriptively (e.g., `feature/auth-refactor`, `fix/data-loading`).
@@ -51,3 +65,4 @@ For non-trivial changes (new features, bug fixes, complex refactors):
 ## Safety & Constraints
 - **Lockfile Integrity:** Do not edit `pixi.lock` manually. If `pyproject.toml` changes, run `pixi install` to re-sync.
 - **Environment Isolation:** Do not suggest creating global virtual environments (`venv` or `virtualenv`) or standard Conda environments.
+- **Production Forcing & Remote Operations:** Never trigger actual remote server rsync/SSH or external transfers during test runs; use unit test configurations and stubs.

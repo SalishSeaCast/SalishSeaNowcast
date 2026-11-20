@@ -250,7 +250,9 @@ pandas-stubs = "2.3.3.*"
 gh = ">=2.103.3,<3"
 
 [tool.pixi.feature.dev.tasks]
+lint = "pre-commit run --all-files"
 pytest = "pytest -n6 --randomly-seed=last"
+check = { depends-on = [ "lint", "pytest" ] }
 
 [tool.pixi.feature.fig-dev.dependencies]
 jupyterlab = ">=4.6.1,<5"
