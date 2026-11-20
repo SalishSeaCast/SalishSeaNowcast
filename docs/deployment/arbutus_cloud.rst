@@ -490,11 +490,12 @@ Reference: https://ubuntu.com/server/docs/how-to/networking/install-nfs/
     $ sudo mkdir -p /export/MEOPAR
     $ sudo mount --bind /nemoShare/MEOPAR /export/MEOPAR
 
-Add the following line to :file:`/etc/fstab`:
+Add the following lines to :file:`/etc/fstab` mount the storage volume and export it to the compute nodes when the VM boots:
 
 .. code-block:: text
 
-    /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
+    /dev/vdc   /nemoShare   ext4   defaults   0   2
+    /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  2
 
 Add the following lines to :file:`/etc/exports`:
 
@@ -509,6 +510,12 @@ Restart the NFS service:
 
     $ sudo systemctl daemon-reload
     $ sudo systemctl start nfs-kernel-server.service
+
+Capture a snapshot image of the instance to use to as the boot image for future builds of the head node using the
+:guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
+Use a name like ``head-cb16-60gb-560-<ddmmmyy>`` for the image,
+with the day's date in place of ``<ddmmmyy>``;
+e.g. ``30jun26``.
 
 
 Compute Node Template
@@ -566,6 +573,12 @@ and set the owner and group:
 
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
+
+Add the following line to :file:`/etc/fstab` to mount the :ref:`PersistentSharedStorage` volume when the VM boots:
+
+.. code-block:: console
+
+   <head-node-ip-address>:/MEOPAR   /nemoShare/MEOPAR   nfs4   defaults   0   2
 
 From the head node,
 copy the public key of the passphrase-less ssh key pair that will be used for
