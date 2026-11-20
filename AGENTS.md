@@ -33,6 +33,15 @@
 ## Code Style
 - **Formatter:** Code formating is enforced via [pre-commit](https://pre-commit.com/) hooks.
 - Ensure any code changes conform to code formatting check before committing.
+### Unit Tests
+1. **Pytest Fixtures over Mocks**: Prefer `monkeypatch` and `tmp_path` fixtures over `unittest.mock.patch`
+   decorators or context managers.
+2. **Real File Operations in Tests**: Use `tmp_path` and real file creation/inspection instead of mocking
+   `pathlib.Path.exists` and `pathlib.Path.open`.
+3. **Autouse Fixtures**: Consolidate repetitive monkeypatching across test classes into class-level
+   `@staticmethod` autouse fixtures.
+4. **Callable Stubs**: Prefer simple local callable functions over `unittest.mock.Mock` instances
+   for simple return-value stubs.
 
 ## Git Commits
 - **Only commit when explicitly asked** by the user — do not commit automatically.
