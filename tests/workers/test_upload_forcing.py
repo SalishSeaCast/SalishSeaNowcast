@@ -401,16 +401,16 @@ def mock_sftp_client(monkeypatch):
 class TestChecklist:
     """Unit tests for checklist returned by upload_forcing() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_sftp(mock_ssh_client, mock_sftp_client, monkeypatch):
         def sftp(host_name, ssh_key):
             return mock_ssh_client, mock_sftp_client
 
         monkeypatch.setattr(upload_forcing.ssh_sftp, "sftp", sftp)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_upload_ssh_files(monkeypatch):
         def _upload_ssh_files(
             sftp_client, run_type, run_date, config, host_name, host_config
@@ -419,8 +419,8 @@ class TestChecklist:
 
         monkeypatch.setattr(upload_forcing, "_upload_ssh_files", _upload_ssh_files)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_upload_fraser_turbidity_file(monkeypatch):
         def _upload_fraser_turbidity_file(
             sftp_client, run_date, config, host_name, host_config
@@ -433,8 +433,8 @@ class TestChecklist:
             _upload_fraser_turbidity_file,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_upload_river_runoff_files(monkeypatch):
         def _upload_river_runoff_files(
             sftp_client, run_date, config, host_name, host_config
@@ -445,8 +445,8 @@ class TestChecklist:
             upload_forcing, "_upload_river_runoff_files", _upload_river_runoff_files
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_upload_weather(monkeypatch):
         def _upload_weather(
             sftp_client, run_type, run_date, config, host_name, host_config
@@ -455,8 +455,8 @@ class TestChecklist:
 
         monkeypatch.setattr(upload_forcing, "_upload_weather", _upload_weather)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_upload_live_ocean_files(monkeypatch):
         def _upload_live_ocean_files(
             sftp_client, run_type, run_date, config, host_name, host_config

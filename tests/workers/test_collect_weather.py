@@ -291,8 +291,8 @@ class TestFailure:
 class TestCollectWeather:
     """Unit tests for collect_weather() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_expected_files(monkeypatch):
         def mock_calc_expected_files(*args):
             return set()

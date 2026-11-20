@@ -1393,8 +1393,8 @@ class TestCreateRunoffArray:
 class TestCalcRunoffDataset:
     """Unit tests for daily_river_flows._calc_runoff_dataset()."""
 
-    @staticmethod
     @pytest.fixture(scope="class")
+    @staticmethod
     def runoff_array():
         _runoff_array = numpy.zeros((898, 398))
         _runoff_array[750:752, 123] = [0.20318864, 0.20318864]

@@ -398,8 +398,8 @@ class TestFailure:
 class TestMakeRunoffFile:
     """Unit tests for make_runoff_file() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_calc_watershed_flows(monkeypatch):
         def _mock_calc_watershed_flows(obs_date, config):
             flows = {
@@ -423,8 +423,8 @@ class TestMakeRunoffFile:
             _mock_calc_watershed_flows,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_get_grid_cell_areas(monkeypatch):
         def _mock_get_grid_cell_areas(config):
             grid_cell_areas = numpy.empty((898, 398), dtype=float)
@@ -435,8 +435,8 @@ class TestMakeRunoffFile:
             make_runoff_file, "_get_grid_cell_areas", _mock_get_grid_cell_areas
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_to_netcdf(monkeypatch):
         def _mock_to_netcdf(runoff_ds, encoding, nc_file_path):
             pass
@@ -507,8 +507,8 @@ class TestMakeRunoffFile:
 class TestCalcWatershedFlows:
     """Unit test for _calc_watershed_flows()."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_do_a_river_pair(monkeypatch):
         mock_watershed_flows = [
             ("bute", 83.3223456),
@@ -533,8 +533,8 @@ class TestCalcWatershedFlows:
 
         monkeypatch.setattr(make_runoff_file, "_do_a_river_pair", _mock_do_a_river_pair)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_do_fraser(monkeypatch):
         def _mock_do_fraser(obs_date, config):
             return 1094.5609129386, 63.9781423614
@@ -1914,8 +1914,8 @@ class TestCreateRunoffArray:
 class TestCalcRunoffDataset:
     """Unit tests for make_runoff_file._calc_runoff_dataset()."""
 
-    @staticmethod
     @pytest.fixture(scope="class")
+    @staticmethod
     def runoff_array():
         _runoff_array = numpy.zeros((898, 398))
         _runoff_array[750:752, 123] = [0.20318864, 0.20318864]

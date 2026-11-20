@@ -124,8 +124,8 @@ class TestFailure:
 class TestGetVFPA_HADCP:
     """Unit test for get_vfpa_hadcp() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_make_hour_dataset(monkeypatch):
 
         def _mock_make_hour_dataset(csv_dir, utc_start_hr, place):
@@ -135,8 +135,8 @@ class TestGetVFPA_HADCP:
             get_vfpa_hadcp, "_make_hour_dataset", _mock_make_hour_dataset
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_write_netcdf(monkeypatch):
         def _mock_write_netcdf(ds, nc_filepath):
             return

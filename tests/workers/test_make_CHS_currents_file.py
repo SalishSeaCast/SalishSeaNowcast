@@ -182,8 +182,8 @@ class TestFailure:
 class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_read_avg_unstagger_rotate(monkeypatch):
         def _mock_read_avg_unstagger_rotate(
             meshfilename, src_dir, ufile, vfile, run_type
@@ -196,16 +196,16 @@ class TestMakeCHSCurrentsFile:
             _mock_read_avg_unstagger_rotate,
         )
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_write_netcdf(monkeypatch):
         def _mock_write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
             return f"{src_dir}/CHS_currents.nc"
 
         monkeypatch.setattr(make_CHS_currents_file, "_write_netcdf", _mock_write_netcdf)
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_fix_perms(monkeypatch):
         def _mock_fix_perms(path, grp_name):
             pass

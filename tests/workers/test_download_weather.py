@@ -291,8 +291,8 @@ class TestFailure:
 class TestGetGrib:
     """Unit tests for get_grib() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_fix_perms(monkeypatch):
         def _mock_fix_perms(filepath):
             pass
@@ -595,8 +595,8 @@ class TestGetGrib:
 class TestMkdirs:
     """Unit tests for _mkdirs() function."""
 
-    @staticmethod
     @pytest.fixture
+    @staticmethod
     def mock_fix_perms(monkeypatch):
         def _mock_fix_perms(path, mode, grp_name):
             pass
