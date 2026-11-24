@@ -162,19 +162,21 @@ def _get_usgs_day_avg_discharge(river_name, data_date, config):
     :rtype: float
     """
     usgs_url = config["rivers"]["usgs url"]
-    usgs_parmas = config["rivers"]["usgs params"]
-    stn_id = config["rivers"]["stations"]["USGS"][river_name]
+    usgs_params = config["rivers"]["usgs params"].copy()
+    monitoring_location_id = config["rivers"]["stations"]["USGS"][river_name]
     yyyymmdd = data_date.format("YYYY-MM-DD")
-    usgs_parmas.update(
+    usgs_params.update(
         {
-            "sites": stn_id,
-            "startDT": yyyymmdd,
-            "endDT": yyyymmdd,
+            "api_key": os.environ["USGS_API_KEY"],
+            "monitoring_location_id": monitoring_location_id,
+            "datetime": f"{yyyymmdd}/{yyyymmdd}",
+            "statistic_id": f"{config['rivers']['usgs params']['statistic_id']}",
+            "parameter_code": f"{config['rivers']['usgs params']['parameter_code']}",
         }
     )
-    with httpx.Client() as client:
+    with httpx.Client(timeout=20) as client:
         try:
-            response = client.get(usgs_url, params=usgs_parmas, follow_redirects=True)
+            response = client.get(usgs_url, params=usgs_params, follow_redirects=True)
             response.raise_for_status()
         except httpx.RequestError as exc:
             msg = f"Error while requesting {exc.request.url}"
@@ -185,26 +187,19 @@ def _get_usgs_day_avg_discharge(river_name, data_date, config):
             logger.critical(msg)
             raise WorkerError(msg)
         try:
-            timeseries = response.json()["value"]["timeSeries"][0]
+            feature = response.json()["features"][0]
         except IndexError:
-            msg = f"{river_name} {yyyymmdd} timeSeries is empty"
+            msg = f"{river_name} {yyyymmdd} features list is empty"
             logger.critical(msg)
             raise WorkerError(msg)
-    no_data_value = timeseries["variable"]["noDataValue"]
-    try:
-        cfs = timeseries["values"][0]["value"][0]["value"]
-    except IndexError:
-        msg = f"IndexError in {river_name} {yyyymmdd} timeSeries JSON"
-        logger.critical(msg)
-        raise WorkerError(msg)
-    except KeyError:
-        msg = f"KeyError in {river_name} {yyyymmdd} timeSeries JSON"
-        logger.critical(msg)
-        raise WorkerError(msg)
-    if cfs == no_data_value:
-        msg = (
-            f"Got no-data value ({no_data_value}) in {river_name} {yyyymmdd} timeSeries"
-        )
+        try:
+            cfs = feature["properties"]["value"]
+        except KeyError:
+            msg = f"KeyError in {river_name} {yyyymmdd} feature properties JSON"
+            logger.critical(msg)
+            raise WorkerError(msg)
+    if cfs is None:
+        msg = f"Got no-data value (null) for {river_name} {yyyymmdd}"
         logger.critical(msg)
         raise WorkerError(msg)
     day_avg_discharge = float(cfs) * 0.0283168

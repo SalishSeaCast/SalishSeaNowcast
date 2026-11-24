@@ -102,18 +102,21 @@ rivers:
   # ECCC datamart hydrometric CSV file name template
   # **Must be quoted to protect {} characters**
   csv file template: "BC_{stn_id}_hourly_hydrometric.csv"
-  # USGS waterservice URL
-  usgs url: https://waterservices.usgs.gov/nwis/dv/
-  # USGS Water Service REST query parameters
+  # USGS Water Data OGC API endpoint URL
+  usgs url: https://api.waterdata.usgs.gov/ogcapi/v1/collections/daily/items
+  # USGS Water Data OGC API query parameters
   usgs params:
-    format: json
+    # Provided by USGS_API_KEY envvar
+    api_key: ""
+    # Statistic id for mean daily value
+    # **Must be quoted to protect leading zeros**
+    statistic_id: "00003"
     # Parameter code for discharge in cubic ft per second
     # **Must be quoted to protect leading zeros**
-    parameterCd: "00060"
-    # River station id and start/end dates that change for every query
-    sites: ""
-    startDT: ""
-    endDT: ""
+    parameter_code: "00060"
+    # River monitoring location id and data date that change for every query
+    monitoring_location_id: ""
+    datetime: ""
   # Mapping of river names and ECCC or USGS station ids for which daily average discharges
   # are calculated and stored
   stations:
@@ -134,11 +137,11 @@ rivers:
       TheodosiaBypass: 08GC006
       TheodosiaDiversion: 08GC005
     USGS:
-      # River name (camel-case): USGS station id
-      SkagitMountVernon: 12200500
-      SnohomishMonroe: 12150800
-      NisquallyMcKenna: 12089500
-      GreenwaterGreenwater: 12097500
+      # River name (camel-case): USGS monitoring location id
+      SkagitMountVernon: USGS-12200500
+      SnohomishMonroe: USGS-12150800
+      NisquallyMcKenna: USGS-12089500
+      GreenwaterGreenwater: USGS-12097500
   # Files containing daily average river discharges
   SOG river files:
     # River name (camel-case): SOG-forcing river flow file path

@@ -44,18 +44,18 @@ def config(base_config):
                 rivers:
                   datamart dir: datamart/hydrometric/
                   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
-                  usgs url: https://waterservices.usgs.gov/nwis/dv/
+                  usgs url: https://api.waterdata.usgs.gov/ogcapi/v1/collections/daily/items
                   usgs params:
-                    format: json
-                    parameterCd: "00060"
-                    sites: ""
-                    startDT: ""
-                    endDT: ""
+                    api_key: ""
+                    statistic_id: "00003"
+                    parameter_code: "00060"
+                    monitoring_location_id: ""
+                    datetime: ""
                   stations:
                     ECCC:
                       Fraser: 08MF005
                     USGS:
-                      SkagitMountVernon: 12200500
+                      SkagitMountVernon: USGS-12200500
                   SOG river files:
                     Fraser: Fraser_flow
                     SkagitMountVernon: Skagit_MountVernon_flow
@@ -129,13 +129,16 @@ class TestConfig:
 
     def test_USGS_url_params(self, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["usgs url"] == "https://waterservices.usgs.gov/nwis/dv/"
+        assert (
+            rivers["usgs url"]
+            == "https://api.waterdata.usgs.gov/ogcapi/v1/collections/daily/items"
+        )
         expected = {
-            "format": "json",
-            "parameterCd": "00060",
-            "sites": "",
-            "startDT": "",
-            "endDT": "",
+            "api_key": "",
+            "statistic_id": "00003",
+            "parameter_code": "00060",
+            "monitoring_location_id": "",
+            "datetime": "",
         }
         assert rivers["usgs params"] == expected
 
@@ -161,10 +164,10 @@ class TestConfig:
     def test_USGS_rivers(self, prod_config):
         rivers = prod_config["rivers"]
         assert rivers["stations"]["USGS"] == {
-            "SkagitMountVernon": 12200500,
-            "SnohomishMonroe": 12150800,
-            "NisquallyMcKenna": 12089500,
-            "GreenwaterGreenwater": 12097500,
+            "SkagitMountVernon": "USGS-12200500",
+            "SnohomishMonroe": "USGS-12150800",
+            "NisquallyMcKenna": "USGS-12089500",
+            "GreenwaterGreenwater": "USGS-12097500",
         }
 
     def test_SOG_river_files(self, prod_config):
@@ -415,33 +418,34 @@ class TestCalcECCC_DayAvgDischarge:
 class TestGetUSGS_DayAvgDischarge:
     """Unit test for _get_usgs_day_avg_discharge() function."""
 
+    @pytest.fixture(scope="function", autouse=True)
+    def mock_usgs_api_key(self, monkeypatch):
+        monkeypatch.setenv("USGS_API_KEY", "usgs-api-key")
+
     def test_get_usgs_day_avg_discharge(self, config, httpx_mock, caplog):
         httpx_mock.add_response(
             json={
-                "value": {
-                    "timeSeries": [
-                        {
-                            "variable": {
-                                "noDataValue": -999999,
-                            },
-                            "values": [{"value": [{"value": 43 / 0.0283168}]}],
-                        }
-                    ]
-                }
+                "features": [
+                    {
+                        "properties": {
+                            "value": 17300,
+                        },
+                    },
+                ],
             }
         )
         caplog.set_level(logging.DEBUG)
 
         day_avg_discharge = collect_river_data._get_usgs_day_avg_discharge(
-            "SkagitMountVernon", "2023-01-06", config
+            "SkagitMountVernon", "2026-11-24", config
         )
 
-        numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
-        # httpx generates an INFO level message in records 0
+        numpy.testing.assert_almost_equal(day_avg_discharge, 17_300 * 0.0283168)
+        # httpx generates an INFO level message in records[0]
         assert caplog.records[1].levelname == "DEBUG"
         expected = (
-            f"average discharge for SkagitMountVernon on 2023-01-06 from "
-            f"https://waterservices.usgs.gov/nwis/dv/: {day_avg_discharge:.6e} m^3/s"
+            f"average discharge for SkagitMountVernon on 2026-11-24 from "
+            f"https://api.waterdata.usgs.gov/ogcapi/v1/collections/daily/items: {17_300 * 0.0283168:.6e} m^3/s"
         )
         assert caplog.messages[1] == expected
 
@@ -467,15 +471,15 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        # httpx generates an INFO level message in records 0
+        # httpx generates an INFO level message in records[0]
         assert caplog.records[1].levelname == "CRITICAL"
         usgs_url = config["rivers"]["usgs url"]
         assert caplog.messages[1].startswith(
             f"Error response 500 while requesting {usgs_url}"
         )
 
-    def test_empty_timeseries(self, config, httpx_mock, caplog):
-        httpx_mock.add_response(json={"value": {"timeSeries": []}})
+    def test_empty_features_list(self, config, httpx_mock, caplog):
+        httpx_mock.add_response(json={"features": []})
         caplog.set_level(logging.DEBUG)
 
         with pytest.raises(WorkerError):
@@ -483,30 +487,23 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        # httpx generates an INFO level message in records 0
+        # httpx generates an INFO level message in records[0]
         assert caplog.records[1].levelname == "CRITICAL"
-        assert caplog.messages[1] == "SkagitMountVernon 2023-01-06 timeSeries is empty"
+        assert (
+            caplog.messages[1] == "SkagitMountVernon 2023-01-06 features list is empty"
+        )
 
     @pytest.mark.parametrize(
-        "values",
+        "feature",
         (
-            [],
-            [{"value": []}],
+            {"not properties": {}},
+            {"properties": {"not value": 43}},
         ),
     )
-    def test_cfs_value_IndexError(self, values, config, httpx_mock, caplog):
+    def test_cfs_value_KeyError(self, feature, config, httpx_mock, caplog):
         httpx_mock.add_response(
             json={
-                "value": {
-                    "timeSeries": [
-                        {
-                            "variable": {
-                                "noDataValue": -999999,
-                            },
-                            "values": values,
-                        }
-                    ]
-                }
+                "features": [feature],
             }
         )
         caplog.set_level(logging.DEBUG)
@@ -516,85 +513,21 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        # httpx generates an INFO level message in records 0
+        # httpx generates an INFO level message in records[0]
         assert caplog.records[1].levelname == "CRITICAL"
-        expected = "IndexError in SkagitMountVernon 2023-01-06 timeSeries JSON"
-        assert caplog.messages[1] == expected
-
-    @pytest.mark.parametrize(
-        "value",
-        (
-            {
-                "timeSeries": [
-                    {
-                        "variable": {
-                            "noDataValue": -999999,
-                        },
-                        "not values": [],
-                    }
-                ]
-            },
-            {
-                "timeSeries": [
-                    {
-                        "variable": {
-                            "noDataValue": -999999,
-                        },
-                        "values": [{"not value": []}],
-                    }
-                ]
-            },
-            {
-                "timeSeries": [
-                    {
-                        "variable": {
-                            "noDataValue": -999999,
-                        },
-                        "values": [{"value": [{"not value": 43}]}],
-                    }
-                ]
-            },
-        ),
-    )
-    def test_cfs_value_KeyError(self, value, config, httpx_mock, caplog):
-        httpx_mock.add_response(
-            json={
-                "value": value,
-            }
-        )
-        caplog.set_level(logging.DEBUG)
-
-        with pytest.raises(WorkerError):
-            collect_river_data._get_usgs_day_avg_discharge(
-                "SkagitMountVernon", "2023-01-06", config
-            )
-
-        # httpx generates an INFO level message in records 0
-        assert caplog.records[1].levelname == "CRITICAL"
-        expected = "KeyError in SkagitMountVernon 2023-01-06 timeSeries JSON"
+        expected = "KeyError in SkagitMountVernon 2023-01-06 feature properties JSON"
         assert caplog.messages[1] == expected
 
     def test_no_data(self, config, httpx_mock, caplog):
         httpx_mock.add_response(
             json={
-                "value": {
-                    "timeSeries": [
-                        {
-                            "variable": {
-                                "noDataValue": -999999,
-                            },
-                            "values": [
-                                {
-                                    "value": [
-                                        {
-                                            "value": -999999,
-                                        }
-                                    ]
-                                }
-                            ],
-                        }
-                    ]
-                }
+                "features": [
+                    {
+                        "properties": {
+                            "value": None,
+                        },
+                    },
+                ],
             }
         )
         caplog.set_level(logging.DEBUG)
@@ -604,11 +537,9 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        # httpx generates an INFO level message in records 0
+        # httpx generates an INFO level message in records[0]
         assert caplog.records[1].levelname == "CRITICAL"
-        expected = (
-            "Got no-data value (-999999) in SkagitMountVernon 2023-01-06 timeSeries"
-        )
+        expected = "Got no-data value (null) for SkagitMountVernon 2023-01-06"
         assert caplog.messages[1] == expected
 
 
