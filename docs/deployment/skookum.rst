@@ -130,6 +130,7 @@ Copy the :file:`/SalishSeaCast/SalishSeaNowcast/.env-skookum` file as
 * a valid Sentry DSN URL as the value in the ``export SENTRY_DSN=...`` line
 * a valid Slack incoming webhook URL as the value in the ``export SLACK_SSC_DAILY_PROGRESS=...`` line
 * a valid Slack incoming webhook URL as the value in the ``export SLACK_SSC_HINDCAST_PROGRESS=...`` line
+* a valid USGS API key as the value in the ``export USGS_API_KEY=...`` line
 
 
 :file:`/SalishSeaCast/sarracenia-env`
