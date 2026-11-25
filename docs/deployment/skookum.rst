@@ -98,14 +98,13 @@ The Python packages that the system depends on are installed in ``default`` envi
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and
 rivers hydrometric files from the `ECCC MSC datamart service`_:
 
-.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
+.. _sarracenia client: https://metpx.github.io/sarracenia/Reference/sr3.1.html#sr3-sarracenia-cli
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
 .. code-block:: console
 
     $ cd /SalishSeaCast/SalishSeaNowcast
     $ pixi install -e sarracenia
-    $ pixi run -e sarracenia sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
 
@@ -175,6 +174,25 @@ The hosts and their :file:`runs` directories presently in use are:
 
 * ``arbutus.cloud``
     See :ref:`ArbutusCloudNEMORunsDirectory`
+
+
+``sarracenia`` Configuration and Cache Directories
+==================================================
+
+Create directories on ``skookum`` for the ``sarracenia`` client configuration and cache files:
+
+.. code-block:: console
+
+    $ mkdir -p $HOME/.config/subscribe
+    $ mkdir -p $HOME/.cache
+
+Create symlinks from the configuration files in :file:`/SalishSeaCast/SalishSeaNowcast/sarracenia/` in :file:`$HOME/.config/subscribe`:
+
+.. code-block:: console
+
+    $ ln -s /SalishSeaCast/SalishSeaNowcast/sarracenia/default.conf $HOME/.config/default.conf
+    $ ln -s /SalishSeaCast/SalishSeaNowcast/sarracenia/hrdps-continental-hpfx-v3.conf $HOME/.config/subscribe/hrdps-continental-hpfx-v3.conf
+    $ ln -s /SalishSeaCast/SalishSeaNowcast/sarracenia/hydrometric-hpfx-v3.conf $HOME/.config/subscribe/hydrometric-hpfx-v3.conf
 
 
 ECCC MSC Datamart Mirror Directories
