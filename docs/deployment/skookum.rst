@@ -186,6 +186,16 @@ Create directories on ``skookum`` for the ``sarracenia`` client configuration an
     $ mkdir -p $HOME/.config/subscribe
     $ mkdir -p $HOME/.cache
 
+Create :file:`$HOME/.config/credentials.conf` file containing:
+
+.. code-block:: output
+
+    amqps://user:password@hpfx.collab.science.gc.ca
+    amqps://user:password@dd.weather.gc.ca
+    amqp://user:password@dd.alpha.meteo.gc.ca
+
+where ``user:password`` are the credentials provided by MSC Datamart.
+
 Create symlinks from the configuration files in :file:`/SalishSeaCast/SalishSeaNowcast/sarracenia/` in :file:`$HOME/.config/subscribe`:
 
 .. code-block:: console
