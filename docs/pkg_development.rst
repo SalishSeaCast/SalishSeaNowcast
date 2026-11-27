@@ -387,7 +387,7 @@ The output looks something like:
     ( pkg_development: line   32) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
     ( pkg_development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg
     ( pkg_development: line   39) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg
-    (deployment/operations: line   35) ok        https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
+    (deployment/operations: line   35) ok        https://metpx.github.io/sarracenia/Reference/sr3.1.html#sr3-sarracenia-cli
     ( pkg_development: line  629) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
     ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues
     ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL

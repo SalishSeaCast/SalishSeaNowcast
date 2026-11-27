@@ -264,23 +264,20 @@ scipy-stubs = ">=1.18.0.1,<2"
 pandas-stubs = "2.3.3.*"
 
 [tool.pixi.feature.sarracenia.dependencies]
-amqp = ">=5.3.1,<6"
+amqp = ">=5.4.2,<6"
 appdirs = ">=1.4.4,<2"
 humanfriendly = ">=10.0,<11"
-humanize = ">=4.16.0,<5"
-jsonpickle = ">=4.1.2,<5"
-netifaces = ">=0.11.0,<0.12"
+humanize = ">=4.17.0,<5"
+jsonpickle = ">=4.1.4,<5"
 psutil = ">=7.2.2,<8"
-paramiko = ">=5.0.0,<6"
-python = "3.11.0.*"
-watchdog = ">=6.0.0,<7"
+python = ">=3.15.2,<3.16"
+watchdog = ">=7.1.1,<8"
 
 [tool.pixi.feature.sarracenia.activation.env]
 SARRACENIA_ENV="/SalishSeaCast/SalishSeaNowcast/.pixi/envs/sarracenia"
-SARRACENIA_CONFIG="/SalishSeaCast/SalishSeaNowcast/sarracenia"
 
 [dependency-groups]
 dev = ["sphinx-rtd-theme==3.1.0"]
 docs = ["sphinx-rtd-theme==3.1.0"]
 fig-dev = ["salishsea_site @ git+https://github.com/SalishSeaCast/salishsea-site.git"]
-sarracenia = ["metpx-sarracenia==2.22.10.post2"]
+sarracenia = [ "metpx-sr3>=3.3.1,<4"]
